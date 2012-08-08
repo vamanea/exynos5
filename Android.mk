@@ -16,6 +16,10 @@
 
 ifeq ($(TARGET_BOARD_PLATFORM),exynos5)
 common_exynos5_dirs := \
+	libcodec \
+	libgscaler \
+	libion_exynos \
+	libswconverter
 
 include $(call all-named-subdir-makefiles,$(common_exynos5_dirs))
 
