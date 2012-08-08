@@ -19,7 +19,8 @@ common_exynos5_dirs := \
 	libcodec \
 	libgscaler \
 	libion_exynos \
-	libswconverter
+	libswconverter \
+	libhwcomposer
 
 include $(call all-named-subdir-makefiles,$(common_exynos5_dirs))
 
