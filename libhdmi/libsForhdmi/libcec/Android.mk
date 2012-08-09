@@ -1,4 +1,3 @@
-#
 # Copyright (C) 2012 The Android Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,17 +11,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
-ifeq ($(TARGET_BOARD_PLATFORM),exynos5)
-common_exynos5_dirs := \
-	libcodec \
-	libgscaler \
-	libion_exynos \
-	libswconverter \
-	libhwcomposer \
-	libhdmi
+ifeq ($(BOARD_USES_HDMI),true)
 
-include $(call all-named-subdir-makefiles,$(common_exynos5_dirs))
+LOCAL_PATH:= $(call my-dir)
+include $(CLEAR_VARS)
+
+LOCAL_MODULE_TAGS := eng
+
+LOCAL_PRELINK_MODULE := false
+LOCAL_SHARED_LIBRARIES := liblog
+LOCAL_SRC_FILES := libcec.c
+
+LOCAL_MODULE := libcec
+include $(BUILD_SHARED_LIBRARY)
 
 endif

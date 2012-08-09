@@ -44,7 +44,6 @@ extern "C" {
 #include "ExynosMutex.h"
 #include "exynos_v4l2.h"
 
-//#include "ExynosBuffer.h"
 #define GSC_FIMD_OUT_WIDTH_ALIGN_WA
 #define NUM_OF_GSC_PLANES           (3)
 #define MAX_BUFFERS_GSCALER_OUT (3)
