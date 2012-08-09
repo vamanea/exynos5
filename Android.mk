@@ -20,7 +20,7 @@ common_exynos5_dirs := \
 	libgscaler \
 	libion_exynos \
 	libswconverter \
-	libhwcomposer \
+	libhwc \
 	libhdmi
 
 include $(call all-named-subdir-makefiles,$(common_exynos5_dirs))
