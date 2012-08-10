@@ -1559,7 +1559,7 @@ static void *hwc_vsync_thread(void *data)
     uevent_init();
     while(true) {
         int len = uevent_next_event(uevent_desc, sizeof(uevent_desc) - 2);
-        bool vsync = !strcmp(uevent_desc, "change@/devices/platform/samsung-pd.10/exynos5-fb.1");
+        bool vsync = !strcmp(uevent_desc, VSYNC_DEV_NAME);
         if(vsync)
             handle_vsync_uevent(ctx, uevent_desc, len);
     }
