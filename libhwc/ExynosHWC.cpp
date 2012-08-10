@@ -41,8 +41,6 @@ extern void check_fps();
 #include "ExynosTVOutService.h"
 #include "ExynosHdmi.h"
 
-#include "report_vsync.h"
-
 static int lcd_width, lcd_height;
 static int prev_usage = 0;
 static int  usage_3d = NOT_DEFINED;
