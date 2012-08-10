@@ -21,6 +21,8 @@ common_exynos5_dirs := \
 	libion_exynos \
 	libswconverter \
 	libhwc \
+	libhwjpeg \
+	libcamera \
 	libhdmi
 
 include $(call all-named-subdir-makefiles,$(common_exynos5_dirs))
