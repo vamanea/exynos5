@@ -1189,8 +1189,6 @@ static int hwc_set(hwc_composer_device_t *dev,
         for (int i = 0; i < NUM_OF_WIN; i++) {
             ctx->layer_prev_buf[i] = 0;
             window_hide(&ctx->win[i]);
-            reset_win_rect_info(&ctx->win[i]);
-            ctx->win[i].status = HWC_WIN_FREE;
         }
         return ret;
     }
@@ -1199,8 +1197,6 @@ static int hwc_set(hwc_composer_device_t *dev,
         //turn off the all windows
         for (int i = 0; i < NUM_OF_WIN; i++) {
             window_hide(&ctx->win[i]);
-            reset_win_rect_info(&ctx->win[i]);
-            ctx->win[i].status = HWC_WIN_FREE;
         }
         ctx->num_of_hwc_layer = 0;
         need_swap_buffers = true;
