@@ -88,11 +88,11 @@ namespace android {
 static CameraInfo sCameraInfo[] = {
     {
         CAMERA_FACING_BACK,
-        0,  /* orientation */
+        BACK_ROTATION,  /* orientation */
     },
     {
         CAMERA_FACING_FRONT,
-        0,  /* orientation */
+        FRONT_ROTATION,  /* orientation */
     }
 };
 
