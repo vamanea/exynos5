@@ -671,10 +671,24 @@ static int assign_overlay_window(struct hwc_context_t *ctx, hwc_layer_t *cur,
 
     if ((rect.x != win->rect_info.x) || (rect.y != win->rect_info.y) ||
         (rect.w != win->rect_info.w) || (rect.h != win->rect_info.h)) {
-        if ((prev_handle->usage & GRALLOC_USAGE_CAMERA) &&
-            (ctx->layer_prev_buf[win_idx] != (uint32_t)cur->handle)) {
-            if ((win->gsc_mode == GSC_OUTPUT_MODE) && ctx->dis_rect_changed) {
+        if (prev_handle->usage & GRALLOC_USAGE_CAMERA) {
+            if ((ctx->layer_prev_buf[win_idx] != (uint32_t)cur->handle) &&
+                (win->gsc_mode == GSC_OUTPUT_MODE) && ctx->dis_rect_changed) {
                 return 1;
+            }
+        } else if (win->ovly_lay_type == HWC_YUV_OVLY) {
+            if ((win->rect_info.w == rect.w) && (win->rect_info.h == rect.h) &&
+                (win->rect_info.x == (rect.x & (~1))) &&
+                (win->rect_info.y == (rect.y & (~1)))) {
+                rect.x = win->rect_info.x;
+                rect.y = win->rect_info.y;
+                win->layer_index = layer_idx;
+                win->status = HWC_WIN_RESERVED;
+                return 0;
+            } else {
+                rect.x = (rect.x + 1) & (~1);
+                rect.y = (rect.y + 1) & (~1);
+                rect.w = (rect.w + 1) & (~1);
             }
         }
 

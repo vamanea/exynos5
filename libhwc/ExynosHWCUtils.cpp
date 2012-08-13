@@ -154,10 +154,6 @@ int window_set_pos(struct hwc_win_info_t *win)
 #endif
         return 0;
 
-    //before changing the screen configuration...powerdown the window
-    if (window_hide(win) != 0)
-        return -1;
-
     SEC_HWC_Log(HWC_LOG_DEBUG, "%s:: x(%d), y(%d)",
             __func__, win->rect_info.x, win->rect_info.y);
 
