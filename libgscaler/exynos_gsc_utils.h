@@ -23,7 +23,6 @@ extern "C" {
 #endif
 
 //#define LOG_NDEBUG 0
-#define LOG_TAG "libexynosgscaler"
 #include <cutils/log.h>
 
 #include <sys/types.h>

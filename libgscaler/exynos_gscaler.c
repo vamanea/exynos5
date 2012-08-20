@@ -24,6 +24,7 @@
  */
 
 //#define LOG_NDEBUG 0
+#define LOG_TAG "libexynosgscaler"
 #include "exynos_gsc_utils.h"
 
 static int exynos_m2m_node[NUM_OF_GSC_HW] = {NODE_NUM_GSC_0, NODE_NUM_GSC_1,
