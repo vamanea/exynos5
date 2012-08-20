@@ -145,33 +145,9 @@ int tvout_std_v4l2_s_dv_preset(int fd, struct v4l2_dv_preset *preset);
 
 void hdmi_cal_rect(int src_w, int src_h, int dst_w, int dst_h, struct v4l2_rect *dst_rect);
 
-void hdmi_align_for_interlaced(
-    unsigned int *aligned_w,
-    unsigned int *aligned_h,
-    int srcW,
-    int srcH,
-    int aligned_value);
-
 int hdmi_captureRun_byGSC(
         unsigned int dst_address,
         void *gsc_cap_handle);
-
-int hdmi_rotateConf_byRotator(
-        void *rotator_handle,
-        unsigned int srcFW,
-        unsigned int srcFH,
-        unsigned int srcW,
-        unsigned int srcH,
-        unsigned int srcColorFormat,
-        unsigned int dstW,
-        unsigned int dstH,
-        unsigned int dstColorFormat);
-
-int hdmi_rotateRun_byRotator(
-        void *rotator_handle,
-        unsigned int src_address,
-        unsigned int dst_address,
-        int rotVal);
 
 int hdmi_Blit_byG2D(
         int srcColorFormat,

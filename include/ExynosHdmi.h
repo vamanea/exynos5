@@ -46,9 +46,7 @@
 
 #include "../libhdmi/libsForhdmi/libedid/libedid.h"
 #include "../libhdmi/libsForhdmi/libcec/libcec.h"
-
 #include "../libhdmi/SecHdmi/SecHdmiCommon.h"
-#include "../libhdmi/libhdmiutils/ExynosHdmiUtils.h"
 
 #include <linux/fb.h>
 #include <utils/threads.h>
@@ -231,9 +229,6 @@ private:
                         int hdmiLayer,
                         int hdmiMode,
                         int flag_full_display);
-
-    bool        m_create_ExternalHandle(void);
-    bool        m_destroy_ExternalHandle(void);
 
     bool        m_setupHdmi(void);
     bool        m_changeHdmiPath(void);

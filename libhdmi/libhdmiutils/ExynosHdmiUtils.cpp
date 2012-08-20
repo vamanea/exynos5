@@ -43,9 +43,9 @@
 #include "s3c_lcd.h"
 #include "audio.h"
 #include "video.h"
-#include "../libhdmi/libsForhdmi/libedid/libedid.h"
-#include "../libhdmi/libsForhdmi/libcec/libcec.h"
-#include "../libhdmi/SecHdmi/SecHdmiCommon.h"
+#include "libedid.h"
+#include "libcec.h"
+#include "SecHdmiCommon.h"
 
 namespace android {
 

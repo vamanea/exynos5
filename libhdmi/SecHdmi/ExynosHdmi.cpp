@@ -22,6 +22,8 @@
 #include "exynos_format.h"
 #include "exynos_gsc_utils.h"
 #include "SecHdmiLog.h"
+#include "ExynosHdmiUtils.h"
+#include "ExynosHdmiModule.h"
 
 #define CHECK_GRAPHIC_LAYER_TIME (0)
 
@@ -488,7 +490,7 @@ bool SecHdmi::destroy(void)
         exynos_mxr_destroy(m_mxr_handle_grp1);
     }
 
-    if (m_destroy_ExternalHandle() == false) {
+    if (m_destroy_ExternalHandle(mExynosRotator) == false) {
         HDMI_Log(HDMI_LOG_ERROR, "%s::m_destroy_ExternalHandle() failed", __func__);
         return false;
     }
@@ -556,7 +558,7 @@ bool SecHdmi::connect(void)
     if (this->setHdcpMode(mHdcpMode, false) == false)
         HDMI_Log(HDMI_LOG_ERROR, "%s::setHdcpMode(%d) fail", __func__, mHdcpMode);
 
-    if (m_create_ExternalHandle() == false) {
+    if (m_create_ExternalHandle(mExynosRotator) == false) {
         HDMI_Log(HDMI_LOG_ERROR, "%s::m_create_ExternalHandle() failed", __func__);
         return false;
     }
@@ -619,7 +621,7 @@ bool SecHdmi::disconnect(void)
         exynos_gsc_destroy(m_gsc_cap_handle);
     }
 
-    if (m_destroy_ExternalHandle() == false) {
+    if (m_destroy_ExternalHandle(mExynosRotator) == false) {
         HDMI_Log(HDMI_LOG_ERROR, "%s::m_destroy_ExternalHandle() failed", __func__);
         return false;
     }

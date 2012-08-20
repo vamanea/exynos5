@@ -27,7 +27,6 @@ LOCAL_SHARED_LIBRARIES := \
 	libcec \
 	libexynosv4l2 \
 	libexynosutils \
-	libexynosrotator \
 	libexynosgscaler \
 	libhdmiutils \
 	libhdmimodule \
@@ -44,6 +43,8 @@ LOCAL_C_INCLUDES += \
 	$(LOCAL_PATH)/../../libhdmi/libsForhdmi/libcec \
 	$(LOCAL_PATH)/../../libhdmi/libsForhdmi/libddc \
 	$(LOCAL_PATH)/../../libgscaler \
+	$(TOP)/hardware/samsung_slsi/$(TARGET_SOC)/libhdmimodule \
+	$(TOP)/hardware/samsung_slsi/$(TARGET_SOC)/include \
 	$(TOP)/hardware/samsung_slsi/exynos/libexynosutils \
 	$(TOP)/hardware/samsung_slsi/exynos/include
 
