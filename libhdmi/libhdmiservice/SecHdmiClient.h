@@ -52,6 +52,7 @@ public:
         HDMI_MODE_UI_0,
         HDMI_MODE_UI_1,
         HDMI_MODE_VIDEO,
+        HDMI_MODE_UI,
     };
 
     enum HDMI_LAYER {

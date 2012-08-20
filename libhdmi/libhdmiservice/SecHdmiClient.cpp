@@ -168,6 +168,9 @@ void SecHdmiClient::blit2Hdmi(uint32_t w, uint32_t h,
                                 uint32_t hdmiLayer,
                                 uint32_t num_of_hwc_layer)
 {
+    if (hdmiLayer == HDMI_MODE_UI)
+        hdmiLayer = HDMI_MODE_MIRROR;
+
     if (g_SecTVOutService != 0 && mEnable == 1)
         g_SecTVOutService->blit2Hdmi(w, h, colorFormat, physYAddr, physCbAddr, physCrAddr, dstX, dstY, hdmiLayer, num_of_hwc_layer);
 }
