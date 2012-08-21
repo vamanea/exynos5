@@ -1570,6 +1570,7 @@ bool ExynosHdmi::m_reset(int w, int h, int dstX, int dstY, int colorFormat, int 
                     dst_info.rot = 0;
                     dst_info.cacheable = 0;
                     dst_info.drmMode = 0;
+                    dst_info.reqBufCnt = 1;
 
                     mxr_dstFW = dst_info.fw;
                     mxr_dstFH = dst_info.fh;

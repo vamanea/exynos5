@@ -2127,7 +2127,7 @@ static int exynos_gsc_cap_config(void *handle,
 
     reqbuf.type   = fmt.type;
     reqbuf.memory = V4L2_MEMORY_USERPTR;
-    reqbuf.count  = 1;
+    reqbuf.count  = gsc_handle->dst_img.reqBufCnt;
 
     if (exynos_v4l2_reqbufs(gsc_handle->gsc_vd_entity->fd, &reqbuf) < 0) {
         ALOGE("%s::request buffers failed", __func__);
@@ -2189,12 +2189,13 @@ static int exynos_gsc_cap_run(void *handle,
     /* Queue the buf */
     if (exynos_v4l2_qbuf(gsc_handle->gsc_vd_entity->fd, &buf) < 0) {
         ALOGE("%s::queue buffer failed (index=%d)(mSrcBufNum=%d)", __func__,
-            gsc_handle->dst.buf_idx, MAX_BUFFERS_GSCALER_CAP);
+            gsc_handle->dst.buf_idx, gsc_handle->dst_img.reqBufCnt);
         return -1;
     }
     gsc_handle->dst.buf_idx++;
 
-    if (gsc_handle->dst.stream_on == false) {
+    if ((gsc_handle->dst.stream_on == false) &&
+        (gsc_handle->dst.buf_idx == gsc_handle->dst_img.reqBufCnt)) {
         if (exynos_v4l2_streamon(gsc_handle->gsc_vd_entity->fd, buf.type) < 0) {
             ALOGE("%s::stream on failed", __func__);
             return -1;
@@ -2207,7 +2208,7 @@ static int exynos_gsc_cap_run(void *handle,
             return -1;
         }
     }
-    gsc_handle->dst.buf_idx = gsc_handle->dst.buf_idx % MAX_BUFFERS_GSCALER_CAP;
+    gsc_handle->dst.buf_idx = gsc_handle->dst.buf_idx % gsc_handle->dst_img.reqBufCnt;
 
     return 0;
 }
@@ -2253,7 +2254,7 @@ static int exynos_gsc_cap_wait_frame_done(void *handle)
     /* DeQueue a buf */
     if (exynos_v4l2_dqbuf(gsc_handle->gsc_vd_entity->fd, &buf) < 0) {
         ALOGE("%s::dequeue buffer failed (index=%d)(mSrcBufNum=%d)", __func__,
-            gsc_handle->dst.buf_idx, MAX_BUFFERS_GSCALER_CAP);
+            gsc_handle->dst.buf_idx, gsc_handle->dst_img.reqBufCnt);
         return -1;
     }
 

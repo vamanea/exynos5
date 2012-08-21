@@ -67,6 +67,7 @@ typedef struct {
     uint32_t cacheable;
     uint32_t drmMode;
     uint32_t fieldOrder;
+    uint32_t reqBufCnt;
 } exynos_gsc_img;
 
 /*
