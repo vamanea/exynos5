@@ -29,10 +29,10 @@
 #include <binder/Parcel.h>
 
 namespace android {
-    class ISecTVOut: public IInterface
+    class IExynosTVOut: public IInterface
     {
         public:
-            DECLARE_META_INTERFACE(SecTVOut);
+            DECLARE_META_INTERFACE(ExynosTVOut);
             virtual void setHdmiCableStatus(uint32_t status) = 0;
             virtual void setHdmiMode(uint32_t mode) = 0;
             virtual void setHdmiResolution(uint32_t resolution, uint32_t s3dMode) = 0;
@@ -57,10 +57,10 @@ namespace android {
             virtual uint32_t getHdmiCableStatus() = 0;
     };
     //--------------------------------------------------------------
-    class BpSecTVOut: public BpInterface<ISecTVOut>
+    class BpExynosTVOut: public BpInterface<IExynosTVOut>
     {
         public:
-            BpSecTVOut(const sp<IBinder>& impl): BpInterface<ISecTVOut>(impl){}
+            BpExynosTVOut(const sp<IBinder>& impl): BpInterface<IExynosTVOut>(impl){}
             virtual void setHdmiCableStatus(uint32_t status);
             virtual void setHdmiMode(uint32_t mode);
             virtual void setHdmiResolution(uint32_t resolution, uint32_t s3dMode);

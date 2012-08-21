@@ -33,7 +33,7 @@
 #include <hardware/hardware.h>
 
 #include "ExynosHdmiUtils.h"
-#include "SecHdmiLog.h"
+#include "ExynosHdmiLog.h"
 
 #if defined(BOARD_USES_HDMI_FIMGAPI)
 #include "sec_g2d_4x.h"
@@ -45,7 +45,7 @@
 #include "video.h"
 #include "libedid.h"
 #include "libcec.h"
-#include "SecHdmiCommon.h"
+#include "ExynosHdmiCommon.h"
 
 namespace android {
 

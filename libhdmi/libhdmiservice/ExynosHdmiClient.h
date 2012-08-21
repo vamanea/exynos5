@@ -36,13 +36,13 @@
 #include <binder/IServiceManager.h>
 #include <gui/ISurfaceComposer.h>
 #include <gui/SurfaceComposerClient.h>
-#include "ISecTVOut.h"
+#include "IExynosTVOut.h"
 
 #define GETSERVICETIMEOUT (5)
 
 namespace android {
 
-class SecHdmiClient
+class ExynosHdmiClient
 {
 public:
     enum HDMI_MODE
@@ -81,12 +81,12 @@ public:
     };
 
 private:
-    SecHdmiClient();
-    virtual ~SecHdmiClient();
+    ExynosHdmiClient();
+    virtual ~ExynosHdmiClient();
     uint32_t    mEnable;
 
 public:
-        static SecHdmiClient * getInstance(void);
+        static ExynosHdmiClient * getInstance(void);
         void setHdmiCableStatus(int status);
         void setHdmiMode(int mode);
         void setHdmiResolution(int resolution, HDMI_S3D_MODE s3dMode);
@@ -111,7 +111,7 @@ public:
 
         uint32_t getHdmiCableStatus();
 private:
-        sp<ISecTVOut> m_getSecTVOutService(void);
+        sp<IExynosTVOut> m_getExynosTVOutService(void);
 
 };
 

@@ -26,7 +26,7 @@ LOCAL_PRELINK_MODULE := false
 
 LOCAL_SRC_FILES := \
 	ExynosTVOutService.cpp \
-	ISecTVOut.cpp \
+	IExynosTVOut.cpp \
 	MessageQueue.cpp
 
 LOCAL_C_INCLUDES := \
@@ -75,7 +75,7 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_PRELINK_MODULE := false
 
 LOCAL_SRC_FILES:= \
-	SecHdmiClient.cpp
+	ExynosHdmiClient.cpp
 
 LOCAL_C_INCLUDES += \
 	$(JNI_H_INCLUDE)

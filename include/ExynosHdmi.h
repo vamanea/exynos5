@@ -46,14 +46,14 @@
 
 #include "../libhdmi/libsForhdmi/libedid/libedid.h"
 #include "../libhdmi/libsForhdmi/libcec/libcec.h"
-#include "../libhdmi/SecHdmi/SecHdmiCommon.h"
+#include "../libhdmi/ExynosHdmi/ExynosHdmiCommon.h"
 
 #include <linux/fb.h>
 #include <utils/threads.h>
 
 namespace android {
 
-class SecHdmi: virtual public RefBase
+class ExynosHdmi: virtual public RefBase
 {
 public :
     enum HDMI_LAYER {
@@ -97,7 +97,7 @@ private :
             bool                mFlagRunning;
 
         private:
-            sp<SecHdmi>         mSecHdmi;
+            sp<ExynosHdmi>         mExynosHdmi;
             Mutex               mThreadLoopLock;
             Mutex               mThreadControlLock;
             virtual bool        threadLoop();
@@ -106,10 +106,10 @@ private :
             int                 mPaddr;
 
         public:
-            CECThread(sp<SecHdmi> secHdmi)
+            CECThread(sp<ExynosHdmi> secHdmi)
                 :Thread(false),
                 mFlagRunning(false),
-                mSecHdmi(secHdmi),
+                mExynosHdmi(secHdmi),
                 mDevtype(CEC_DEVICE_PLAYER),
                 mLaddr(0),
                 mPaddr(0){
@@ -190,8 +190,8 @@ private :
 
 public :
 
-    SecHdmi();
-    virtual ~SecHdmi();
+    ExynosHdmi();
+    virtual ~ExynosHdmi();
     bool        create(int width, int height);
     bool        destroy(void);
     inline bool flagCreate(void) { return mFlagCreate; }

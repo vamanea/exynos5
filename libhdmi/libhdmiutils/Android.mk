@@ -30,12 +30,12 @@ LOCAL_SHARED_LIBRARIES := \
 	libexynosgscaler
 
 LOCAL_SRC_FILES := \
-	SecHdmiLog.cpp \
+	ExynosHdmiLog.cpp \
 	ExynosHdmiUtils.cpp
 
 LOCAL_C_INCLUDES += \
 	$(LOCAL_PATH)/../../include \
-	$(LOCAL_PATH)/../SecHdmi \
+	$(LOCAL_PATH)/../ExynosHdmi \
 	$(LOCAL_PATH)/../libsForhdmi/libedid \
 	$(LOCAL_PATH)/../libsForhdmi/libcec \
 	$(LOCAL_PATH)/../libsForhdmi/libddc \

@@ -23,7 +23,7 @@
  */
 
 #include <utils/Log.h>
-#include "SecHdmiLog.h"
+#include "ExynosHdmiLog.h"
 
 void _HDMI_Log(HDMI_LOG_LEVEL logLevel, const char *tag, const char *msg, ...)
 {

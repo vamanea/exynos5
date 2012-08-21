@@ -53,7 +53,7 @@
 #include "ExynosHWCModule.h"
 
 #if defined(BOARD_USES_HDMI)
-#include "SecHdmiClient.h"
+#include "ExynosHdmiClient.h"
 #endif
 
 #define GSC_OUT_DEV_ID 0
@@ -203,13 +203,13 @@ struct hwc_context_t {
     int           dis_rect_changed;
     int         gsc_out_max_down_scale_ratio;
 #if defined(BOARD_USES_HDMI)
-    android::SecHdmiClient    *mHdmiClient;
+    android::ExynosHdmiClient    *mHdmiClient;
     int                       mHdmiCableStatus;
     int                       num_of_s3d_layer;
     int                       num_of_protected_layer;
     int                       num_of_ext_disp_layer;
     int                       num_of_ext_disp_video_layer;
-    int                       hdmi_layer_buf_index[android::SecHdmiClient::HDMI_LAYER_MAX];
+    int                       hdmi_layer_buf_index[android::ExynosHdmiClient::HDMI_LAYER_MAX];
 #endif
 
     int                       num_of_yuv_layers;

@@ -21,7 +21,7 @@
 #include "ExynosHdmi.h"
 #include "exynos_format.h"
 #include "exynos_gsc_utils.h"
-#include "SecHdmiLog.h"
+#include "ExynosHdmiLog.h"
 #include "ExynosHdmiUtils.h"
 #include "ExynosHdmiModule.h"
 
@@ -37,14 +37,14 @@ extern unsigned int ui_src_memory[MAX_BUFFERS_GSCALER_CAP];
 extern unsigned int ui_memory_size;
 
 #if defined(BOARD_USES_CEC)
-SecHdmi::CECThread::~CECThread()
+ExynosHdmi::CECThread::~CECThread()
 {
     HDMI_Log(HDMI_LOG_DEBUG, "%s", __func__);
 
     mFlagRunning = false;
 }
 
-bool SecHdmi::CECThread::threadLoop()
+bool ExynosHdmi::CECThread::threadLoop()
 {
     unsigned char buffer[CEC_MAX_FRAME_SIZE];
     int size;
@@ -132,7 +132,7 @@ bool SecHdmi::CECThread::threadLoop()
     return true;
 }
 
-bool SecHdmi::CECThread::start()
+bool ExynosHdmi::CECThread::start()
 {
     HDMI_Log(HDMI_LOG_DEBUG, "%s", __func__);
 
@@ -183,7 +183,7 @@ bool SecHdmi::CECThread::start()
 
     HDMI_Log(HDMI_LOG_DEBUG, "request to run CECThread");
 
-    status_t ret = run("SecHdmi::CECThread", PRIORITY_DISPLAY);
+    status_t ret = run("ExynosHdmi::CECThread", PRIORITY_DISPLAY);
     if (ret != NO_ERROR) {
         HDMI_Log(HDMI_LOG_ERROR, "%s fail to run thread", __func__);
         return false;
@@ -191,7 +191,7 @@ bool SecHdmi::CECThread::start()
     return true;
 }
 
-bool SecHdmi::CECThread::stop()
+bool ExynosHdmi::CECThread::stop()
 {
     HDMI_Log(HDMI_LOG_DEBUG, "%s request Exit", __func__);
 
@@ -209,7 +209,7 @@ bool SecHdmi::CECThread::stop()
 }
 #endif
 
-SecHdmi::SecHdmi():
+ExynosHdmi::ExynosHdmi():
 #if defined(BOARD_USES_CEC)
     mCECThread(NULL),
 #endif
@@ -293,7 +293,7 @@ SecHdmi::SecHdmi():
 
 }
 
-SecHdmi::~SecHdmi()
+ExynosHdmi::~ExynosHdmi()
 {
     HDMI_Log(HDMI_LOG_DEBUG, "%s", __func__);
 
@@ -303,7 +303,7 @@ SecHdmi::~SecHdmi()
         disconnect();
 }
 
-bool SecHdmi::create(int width, int height)
+bool ExynosHdmi::create(int width, int height)
 {
     HDMI_Log(HDMI_LOG_DEBUG, "%s", __func__);
 
@@ -409,7 +409,7 @@ CREATE_FAIL :
     return false;
 }
 
-bool SecHdmi::destroy(void)
+bool ExynosHdmi::destroy(void)
 {
     HDMI_Log(HDMI_LOG_DEBUG, "%s", __func__);
 
@@ -510,7 +510,7 @@ DESTROY_FAIL :
     return false;
 }
 
-bool SecHdmi::connect(void)
+bool ExynosHdmi::connect(void)
 {
     HDMI_Log(HDMI_LOG_DEBUG, "%s", __func__);
     {
@@ -574,7 +574,7 @@ bool SecHdmi::connect(void)
     return true;
 }
 
-bool SecHdmi::disconnect(void)
+bool ExynosHdmi::disconnect(void)
 {
     HDMI_Log(HDMI_LOG_DEBUG, "%s", __func__);
 
@@ -652,7 +652,7 @@ bool SecHdmi::disconnect(void)
     return true;
 }
 
-bool SecHdmi::flagConnected(void)
+bool ExynosHdmi::flagConnected(void)
 {
     HDMI_Log(HDMI_LOG_DEBUG, "%s", __func__);
 
@@ -667,7 +667,7 @@ bool SecHdmi::flagConnected(void)
     return mFlagConnected;
 }
 
-bool SecHdmi::flush(int srcW, int srcH, int srcColorFormat,
+bool ExynosHdmi::flush(int srcW, int srcH, int srcColorFormat,
         unsigned int srcYAddr, unsigned int srcCbAddr, unsigned int srcCrAddr,
         int dstX, int dstY,
         int hdmiLayer,
@@ -705,7 +705,7 @@ bool SecHdmi::flush(int srcW, int srcH, int srcColorFormat,
     return ret;
 }
 
-bool SecHdmi::m_Doflush(int srcW, int srcH, int srcColorFormat,
+bool ExynosHdmi::m_Doflush(int srcW, int srcH, int srcColorFormat,
         unsigned int srcYAddr, unsigned int srcCbAddr, unsigned int srcCrAddr,
         int dstX, int dstY,
         int hdmiLayer,
@@ -880,11 +880,11 @@ bool SecHdmi::m_Doflush(int srcW, int srcH, int srcColorFormat,
                 if (MAX_BUFFERS_MIXER <= mHdmiDstAddrIndex_UI)
                     mHdmiDstAddrIndex_UI = 0;
 
-                if (hdmi_rotateRun_byRotator(mExynosRotator,
-                                            (unsigned int)ui_src_memory[0],
-                                            (unsigned int)ui_dst_memory[mHdmiDstAddrIndex_UI],
-                                            mUIRotVal) < 0) {
-                    HDMI_Log(HDMI_LOG_ERROR, "%s::hdmi_rotateRun_byRotator() failed", __func__);
+                if (hdmi_rotateRun(mExynosRotator,
+                                    (unsigned int)ui_src_memory[0],
+                                    (unsigned int)ui_dst_memory[mHdmiDstAddrIndex_UI],
+                                    mUIRotVal) < 0) {
+                    HDMI_Log(HDMI_LOG_ERROR, "%s::hdmi_rotateRun() failed", __func__);
                     return false;
                 }
                 dstYAddr = (unsigned int)ui_dst_memory[mHdmiDstAddrIndex_UI];
@@ -920,7 +920,7 @@ bool SecHdmi::m_Doflush(int srcW, int srcH, int srcColorFormat,
     return true;
 }
 
-bool SecHdmi::clearHdmiWriteBack()
+bool ExynosHdmi::clearHdmiWriteBack()
 {
     HDMI_Log(HDMI_LOG_DEBUG, "%s::layer=%d", __func__);
 
@@ -934,7 +934,7 @@ bool SecHdmi::clearHdmiWriteBack()
     return true;
 }
 
-bool SecHdmi::clear(int hdmiLayer)
+bool ExynosHdmi::clear(int hdmiLayer)
 {
     HDMI_Log(HDMI_LOG_DEBUG, "%s::hdmiLayer = %d", __func__, hdmiLayer);
 
@@ -954,7 +954,7 @@ bool SecHdmi::clear(int hdmiLayer)
     return true;
 }
 
-bool SecHdmi::setHdmiLayerEnable(int hdmiLayer)
+bool ExynosHdmi::setHdmiLayerEnable(int hdmiLayer)
 {
     Mutex::Autolock lock_UI(mLock_UI);
     Mutex::Autolock lock_VIDEO(mLock_VIDEO);
@@ -980,7 +980,7 @@ bool SecHdmi::setHdmiLayerEnable(int hdmiLayer)
     return true;
 }
 
-bool SecHdmi::setHdmiLayerDisable(int hdmiLayer)
+bool ExynosHdmi::setHdmiLayerDisable(int hdmiLayer)
 {
     Mutex::Autolock lock_UI(mLock_UI);
     Mutex::Autolock lock_VIDEO(mLock_VIDEO);
@@ -1004,7 +1004,7 @@ bool SecHdmi::setHdmiLayerDisable(int hdmiLayer)
     return true;
 }
 
-bool SecHdmi::setHdmiPath(int hdmiPath)
+bool ExynosHdmi::setHdmiPath(int hdmiPath)
 {
     HDMI_Log(HDMI_LOG_DEBUG, "%s::hdmiPath = %d", __func__, hdmiPath);
 
@@ -1028,7 +1028,7 @@ bool SecHdmi::setHdmiPath(int hdmiPath)
     return true;
 }
 
-bool SecHdmi::setHdmiDrmMode(int drmMode)
+bool ExynosHdmi::setHdmiDrmMode(int drmMode)
 {
     HDMI_Log(HDMI_LOG_DEBUG, "%s::drmMode = %d, mHdmiPath=%d", __func__, drmMode, mHdmiPath);
 
@@ -1042,7 +1042,7 @@ bool SecHdmi::setHdmiDrmMode(int drmMode)
     return true;
 }
 
-bool SecHdmi::setHdmiOutputMode(int hdmiOutputMode, bool forceRun)
+bool ExynosHdmi::setHdmiOutputMode(int hdmiOutputMode, bool forceRun)
 {
     HDMI_Log(HDMI_LOG_DEBUG, "%s::hdmiOutputMode=%d, forceRun=%d", __func__, hdmiOutputMode, forceRun);
 
@@ -1091,7 +1091,7 @@ bool SecHdmi::setHdmiOutputMode(int hdmiOutputMode, bool forceRun)
     return true;
 }
 
-bool SecHdmi::setHdmiResolution(unsigned int hdmiResolutionValue, unsigned int s3dMode, bool forceRun)
+bool ExynosHdmi::setHdmiResolution(unsigned int hdmiResolutionValue, unsigned int s3dMode, bool forceRun)
 {
     HDMI_Log(HDMI_LOG_DEBUG, "%s::hdmiResolutionValue=%d, s3dMode=%d, forceRun=%d",
             __func__, hdmiResolutionValue, s3dMode, forceRun);
@@ -1196,7 +1196,7 @@ bool SecHdmi::setHdmiResolution(unsigned int hdmiResolutionValue, unsigned int s
     return true;
 }
 
-bool SecHdmi::setHdcpMode(bool hdcpMode, bool forceRun)
+bool ExynosHdmi::setHdcpMode(bool hdcpMode, bool forceRun)
 {
     HDMI_Log(HDMI_LOG_DEBUG, "%s", __func__);
 
@@ -1219,7 +1219,7 @@ bool SecHdmi::setHdcpMode(bool hdcpMode, bool forceRun)
     return true;
 }
 
-bool SecHdmi::setUIRotation(unsigned int rotVal, unsigned int hwcLayer)
+bool ExynosHdmi::setUIRotation(unsigned int rotVal, unsigned int hwcLayer)
 {
     HDMI_Log(HDMI_LOG_DEBUG, "%s::rotVal=%d, mUIRotVal=%d, hwcLayer=%d", __func__, rotVal, mUIRotVal, hwcLayer);
 
@@ -1245,7 +1245,7 @@ bool SecHdmi::setUIRotation(unsigned int rotVal, unsigned int hwcLayer)
     return true;
 }
 
-bool SecHdmi::setDisplaySize(int width, int height)
+bool ExynosHdmi::setDisplaySize(int width, int height)
 {
     mDisplayWidth = width;
     mDisplayHeight = height;
@@ -1253,7 +1253,7 @@ bool SecHdmi::setDisplaySize(int width, int height)
     return true;
 }
 
-bool SecHdmi::m_changeHdmiPath(void)
+bool ExynosHdmi::m_changeHdmiPath(void)
 {
     if (mCurrentHdmiPath == mHdmiPath)
         return true;
@@ -1308,7 +1308,7 @@ bool SecHdmi::m_changeHdmiPath(void)
     return true;
 }
 
-bool SecHdmi::m_clearbuffer(int layer)
+bool ExynosHdmi::m_clearbuffer(int layer)
 {
     HDMI_Log(HDMI_LOG_DEBUG, "%s::layer=%d", __func__, layer);
 
@@ -1354,7 +1354,7 @@ bool SecHdmi::m_clearbuffer(int layer)
     return true;
 }
 
-bool SecHdmi::m_reset(int w, int h, int dstX, int dstY, int colorFormat, int hdmiLayer, int hdmiMode, int flag_full_display)
+bool ExynosHdmi::m_reset(int w, int h, int dstX, int dstY, int colorFormat, int hdmiLayer, int hdmiMode, int flag_full_display)
 {
     HDMI_Log(HDMI_LOG_DEBUG,
             "%s::w=%d, h=%d\r\n"
@@ -1597,7 +1597,7 @@ bool SecHdmi::m_reset(int w, int h, int dstX, int dstY, int colorFormat, int hdm
                             rot_dstH = dst_info.w;
                         }
 
-                        hdmi_rotateConf_byRotator(mExynosRotator,
+                        hdmi_rotateConf(mExynosRotator,
                                                   dst_info.fw,
                                                   dst_info.fh,
                                                   dst_info.w,
@@ -1715,7 +1715,7 @@ bool SecHdmi::m_reset(int w, int h, int dstX, int dstY, int colorFormat, int hdm
     return true;
 }
 
-bool SecHdmi::m_runHdmi(int layer, unsigned int srcYAddr, unsigned int srcCbAddr, unsigned int srcCrAddr)
+bool ExynosHdmi::m_runHdmi(int layer, unsigned int srcYAddr, unsigned int srcCbAddr, unsigned int srcCrAddr)
 {
     HDMI_Log(HDMI_LOG_DEBUG, "%s::layer = %d", __func__, layer);
 
@@ -1807,7 +1807,7 @@ bool SecHdmi::m_runHdmi(int layer, unsigned int srcYAddr, unsigned int srcCbAddr
     return true;
 }
 
-bool SecHdmi::m_stopHdmi(int layer)
+bool ExynosHdmi::m_stopHdmi(int layer)
 {
     HDMI_Log(HDMI_LOG_DEBUG, "%s::layer=%d", __func__, layer);
 
@@ -1845,7 +1845,7 @@ bool SecHdmi::m_stopHdmi(int layer)
     return true;
 }
 
-bool SecHdmi::m_setHdmiOutputMode(int hdmiOutputMode)
+bool ExynosHdmi::m_setHdmiOutputMode(int hdmiOutputMode)
 {
     HDMI_Log(HDMI_LOG_DEBUG, "%s", __func__);
     int s_value = 0;
@@ -1876,7 +1876,7 @@ bool SecHdmi::m_setHdmiOutputMode(int hdmiOutputMode)
     return true;
 }
 
-bool SecHdmi::m_setHdmiResolution(unsigned int hdmiResolutionValue, unsigned int s3dMode)
+bool ExynosHdmi::m_setHdmiResolution(unsigned int hdmiResolutionValue, unsigned int s3dMode)
 {
     HDMI_Log(HDMI_LOG_DEBUG, "%s", __func__);
 
@@ -1908,7 +1908,7 @@ bool SecHdmi::m_setHdmiResolution(unsigned int hdmiResolutionValue, unsigned int
     return true;
 }
 
-bool SecHdmi::m_setHdcpMode(bool hdcpMode)
+bool ExynosHdmi::m_setHdcpMode(bool hdcpMode)
 {
     HDMI_Log(HDMI_LOG_DEBUG, "%s", __func__);
 
@@ -1928,7 +1928,7 @@ bool SecHdmi::m_setHdcpMode(bool hdcpMode)
 }
 
 #if 0 // Before activate this code, check the driver support, first.
-bool SecHdmi::m_setAudioMode(int audioMode)
+bool ExynosHdmi::m_setAudioMode(int audioMode)
 {
     HDMI_Log(HDMI_LOG_DEBUG, "%s", __func__);
 
@@ -1950,7 +1950,7 @@ bool SecHdmi::m_setAudioMode(int audioMode)
 }
 #endif
 
-int SecHdmi::m_resolutionValueIndex(unsigned int ResolutionValue, unsigned int s3dMode)
+int ExynosHdmi::m_resolutionValueIndex(unsigned int ResolutionValue, unsigned int s3dMode)
 {
     HDMI_Log(HDMI_LOG_DEBUG, "%s", __func__);
 
@@ -1984,7 +1984,7 @@ int SecHdmi::m_resolutionValueIndex(unsigned int ResolutionValue, unsigned int s
     return index;
 }
 
-bool SecHdmi::m_flagHWConnected(void)
+bool ExynosHdmi::m_flagHWConnected(void)
 {
     HDMI_Log(HDMI_LOG_DEBUG, "%s", __func__);
 
@@ -2004,7 +2004,7 @@ bool SecHdmi::m_flagHWConnected(void)
     return cable_status;
 }
 
-bool SecHdmi::m_enableLayerBlending()
+bool ExynosHdmi::m_enableLayerBlending()
 {
     HDMI_Log(HDMI_LOG_DEBUG, "%s", __func__);
 
@@ -2033,7 +2033,7 @@ bool SecHdmi::m_enableLayerBlending()
     return true;
 }
 
-int SecHdmi::m_setMemory(int ionClient, int * fd, unsigned int map_size, unsigned int * ion_map_ptr, unsigned int flag)
+int ExynosHdmi::m_setMemory(int ionClient, int * fd, unsigned int map_size, unsigned int * ion_map_ptr, unsigned int flag)
 {
     HDMI_Log(HDMI_LOG_DEBUG, "%s", __func__);
 
@@ -2064,7 +2064,7 @@ int SecHdmi::m_setMemory(int ionClient, int * fd, unsigned int map_size, unsigne
 
 #define CHK_FRAME_CNT 30
 
-void SecHdmi::m_CheckFps(void)
+void ExynosHdmi::m_CheckFps(void)
 {
     static struct timeval tick, tick_old;
     static int total = 0;

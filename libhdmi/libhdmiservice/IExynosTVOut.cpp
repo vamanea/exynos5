@@ -26,7 +26,7 @@
 #include <sys/types.h>
 #include <binder/Parcel.h>
 #include <utils/Log.h>
-#include "ISecTVOut.h"
+#include "IExynosTVOut.h"
 
 namespace android {
 
@@ -46,28 +46,28 @@ namespace android {
         SET_HDMI_LAYER_DISABLE
     };
 
-    void BpSecTVOut::setHdmiCableStatus(uint32_t status)
+    void BpExynosTVOut::setHdmiCableStatus(uint32_t status)
     {
         Parcel data, reply;
         data.writeInt32(status);
         remote()->transact(SET_HDMI_STATUS, data, &reply);
     }
 
-    uint32_t BpSecTVOut::getHdmiCableStatus()
+    uint32_t BpExynosTVOut::getHdmiCableStatus()
     {
         Parcel data, reply;
         remote()->transact(GET_HDMI_STATUS, data, &reply);
         return reply.readInt32();
     }
 
-    void BpSecTVOut::setHdmiMode(uint32_t mode)
+    void BpExynosTVOut::setHdmiMode(uint32_t mode)
     {
         Parcel data, reply;
         data.writeInt32(mode);
         remote()->transact(SET_HDMI_MODE, data, &reply);
     }
 
-    void BpSecTVOut::setHdmiResolution(uint32_t resolution, uint32_t s3dMode)
+    void BpExynosTVOut::setHdmiResolution(uint32_t resolution, uint32_t s3dMode)
     {
         Parcel data, reply;
         data.writeInt32(resolution);
@@ -75,14 +75,14 @@ namespace android {
         remote()->transact(SET_HDMI_RESOLUTION, data, &reply);
     }
 
-    void BpSecTVOut::setHdmiHdcp(uint32_t resolution)
+    void BpExynosTVOut::setHdmiHdcp(uint32_t resolution)
     {
         Parcel data, reply;
         data.writeInt32(resolution);
         remote()->transact(SET_HDMI_HDCP, data, &reply);
     }
 
-    void BpSecTVOut::setHdmiRotate(uint32_t rotVal, uint32_t hwcLayer)
+    void BpExynosTVOut::setHdmiRotate(uint32_t rotVal, uint32_t hwcLayer)
     {
         Parcel data, reply;
         data.writeInt32(rotVal);
@@ -90,35 +90,35 @@ namespace android {
         remote()->transact(SET_HDMI_ROTATE, data, &reply);
     }
 
-    void BpSecTVOut::setHdmiHwcLayer(uint32_t hwcLayer)
+    void BpExynosTVOut::setHdmiHwcLayer(uint32_t hwcLayer)
     {
         Parcel data, reply;
         data.writeInt32(hwcLayer);
         remote()->transact(SET_HDMI_HWCLAYER, data, &reply);
     }
 
-    void BpSecTVOut::setHdmiClearLayer(uint32_t enable)
+    void BpExynosTVOut::setHdmiClearLayer(uint32_t enable)
     {
         Parcel data, reply;
         data.writeInt32(enable);
         remote()->transact(SET_HDMI_CLEARLAYER, data, &reply);
     }
 
-    void BpSecTVOut::setHdmiPath(uint32_t path)
+    void BpExynosTVOut::setHdmiPath(uint32_t path)
     {
         Parcel data, reply;
         data.writeInt32(path);
         remote()->transact(SET_HDMI_PATH, data, &reply);
     }
 
-    void BpSecTVOut::setHdmiDRM(uint32_t drmMode)
+    void BpExynosTVOut::setHdmiDRM(uint32_t drmMode)
     {
         Parcel data, reply;
         data.writeInt32(drmMode);
         remote()->transact(SET_HDMI_DRM, data, &reply);
     }
 
-    void BpSecTVOut::blit2Hdmi(uint32_t w, uint32_t h,
+    void BpExynosTVOut::blit2Hdmi(uint32_t w, uint32_t h,
                                         uint32_t colorFormat,
                                         uint32_t physYAddr,
                                         uint32_t physCbAddr,
@@ -142,14 +142,14 @@ namespace android {
         remote()->transact(BLIT_2_HDMI, data, &reply);
     }
 
-    void BpSecTVOut::setHdmiLayerEnable(uint32_t hdmiLayer)
+    void BpExynosTVOut::setHdmiLayerEnable(uint32_t hdmiLayer)
     {
         Parcel data, reply;
         data.writeInt32(hdmiLayer);
         remote()->transact(SET_HDMI_LAYER_ENABLE, data, &reply);
     }
 
-    void BpSecTVOut::setHdmiLayerDisable(uint32_t hdmiLayer)
+    void BpExynosTVOut::setHdmiLayerDisable(uint32_t hdmiLayer)
     {
         Parcel data, reply;
         data.writeInt32(hdmiLayer);
@@ -157,5 +157,5 @@ namespace android {
     }
 
 
-    IMPLEMENT_META_INTERFACE(SecTVOut, "android.os.ISecTVOut");
+    IMPLEMENT_META_INTERFACE(ExynosTVOut, "android.os.IExynosTVOut");
 };

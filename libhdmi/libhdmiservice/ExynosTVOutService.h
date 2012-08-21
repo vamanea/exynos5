@@ -31,7 +31,7 @@
 #include <binder/Parcel.h>
 #include <utils/KeyedVector.h>
 
-#include "ISecTVOut.h"
+#include "IExynosTVOut.h"
 #include "ExynosHdmi.h"
 #include "MessageQueue.h"
 
@@ -39,9 +39,9 @@ namespace android {
 //#define CHECK_VIDEO_TIME
 //#define CHECK_UI_TIME
 
-    class SecHdmiEventMsg;
+    class ExynosHdmiEventMsg;
 
-    class SecTVOutService : public BBinder
+    class ExynosTVOutService : public BBinder
     {
         public :
             enum {
@@ -61,9 +61,9 @@ namespace android {
             mutable Mutex mLock;
 
             class HDMIFlushThreadForUI : public Thread {
-                SecTVOutService *mTVOutService;
+                ExynosTVOutService *mTVOutService;
             public:
-                HDMIFlushThreadForUI(SecTVOutService *service):
+                HDMIFlushThreadForUI(ExynosTVOutService *service):
                 Thread(false),
                 mTVOutService(service) { }
                 virtual void onFirstRef() {
@@ -81,9 +81,9 @@ namespace android {
             bool                mExitHdmiFlushThreadForUI;
 
             class HDMIFlushThreadForVIDEO: public Thread {
-                SecTVOutService *mTVOutService;
+                ExynosTVOutService *mTVOutService;
             public:
-                HDMIFlushThreadForVIDEO(SecTVOutService *service):
+                HDMIFlushThreadForVIDEO(ExynosTVOutService *service):
                 Thread(false),
                 mTVOutService(service) { }
                 virtual void onFirstRef() {
@@ -100,10 +100,10 @@ namespace android {
 
             bool                mExitHdmiFlushThreadForVIDEO;
 
-            SecTVOutService();
+            ExynosTVOutService();
             static int instantiate ();
             virtual status_t onTransact(uint32_t, const Parcel &, Parcel *, uint32_t);
-            virtual ~SecTVOutService ();
+            virtual ~ExynosTVOutService ();
 
             virtual void                        setHdmiStatus(uint32_t status, bool isBooting);
             virtual void                        setHdmiMode(uint32_t mode);
@@ -126,9 +126,9 @@ namespace android {
             void                                setLCDsize(void);
 
         private:
-            sp<SecHdmiEventMsg>         mMsgForVideo;
-            sp<SecHdmiEventMsg>         mMsgForUI;
-            SecHdmi                     mSecHdmi;
+            sp<ExynosHdmiEventMsg>      mMsgForVideo;
+            sp<ExynosHdmiEventMsg>      mMsgForUI;
+            ExynosHdmi                  mExynosHdmi;
             bool                        mHdmiCableInserted;
             int                         mUILayerMode;
             uint32_t                    mLCD_width, mLCD_height;
@@ -139,7 +139,7 @@ namespace android {
             uint32_t                    mEnable;
     };
 
-    class SecHdmiEventMsg : public MessageBase {
+    class ExynosHdmiEventMsg : public MessageBase {
         public:
             enum {
                 HDMI_MODE_NONE = 0,
@@ -151,7 +151,7 @@ namespace android {
 
             mutable     Mutex mBlitLock;
 
-            SecHdmi     *pSecHdmi;
+            ExynosHdmi     *pExynosHdmi;
             uint32_t                    mSrcWidth, mSrcHeight;
             uint32_t                    mSrcColorFormat;
             uint32_t                    mSrcYAddr, mSrcCbAddr, mSrcCrAddr;
@@ -159,10 +159,10 @@ namespace android {
             uint32_t                    mHdmiMode;
             uint32_t                    mHdmiLayer, mflag_full_display;
 
-            SecHdmiEventMsg(SecHdmi *SecHdmi, uint32_t srcWidth, uint32_t srcHeight, uint32_t srcColorFormat,
+            ExynosHdmiEventMsg(ExynosHdmi *ExynosHdmi, uint32_t srcWidth, uint32_t srcHeight, uint32_t srcColorFormat,
                     uint32_t srcYAddr, uint32_t srcCbAddr, uint32_t srcCrAddr,
                     uint32_t dstX, uint32_t dstY, uint32_t hdmiLayer, uint32_t flag_full_display, uint32_t hdmiMode)
-                : pSecHdmi(SecHdmi), mSrcWidth(srcWidth), mSrcHeight(srcHeight), mSrcColorFormat(srcColorFormat),
+                : pExynosHdmi(ExynosHdmi), mSrcWidth(srcWidth), mSrcHeight(srcHeight), mSrcColorFormat(srcColorFormat),
                 mSrcYAddr(srcYAddr), mSrcCbAddr(srcCbAddr), mSrcCrAddr(srcCrAddr),
                 mDstX(dstX), mDstY(dstY), mHdmiLayer(hdmiLayer), mflag_full_display(flag_full_display), mHdmiMode(hdmiMode) {
             }
@@ -181,29 +181,29 @@ namespace android {
 #ifdef CHECK_UI_TIME
                     start = systemTime();
 #endif
-                    if (pSecHdmi->flush(mSrcWidth, mSrcHeight, mSrcColorFormat, mSrcYAddr, mSrcCbAddr, mSrcCrAddr,
+                    if (pExynosHdmi->flush(mSrcWidth, mSrcHeight, mSrcColorFormat, mSrcYAddr, mSrcCbAddr, mSrcCrAddr,
                                 mDstX, mDstY, mHdmiLayer, mHdmiMode, mflag_full_display) == false) {
-                        ALOGE("%s::pSecHdmi->flush() fail on HDMI_MODE_UI_X(or MIRROR)", __func__);
+                        ALOGE("%s::pExynosHdmi->flush() fail on HDMI_MODE_UI_X(or MIRROR)", __func__);
                         ret = false;
                     }
 
 #ifdef CHECK_UI_TIME
                     end = systemTime();
-                    ALOGD("[UI] pSecHdmi->flush[end-start] = %ld ms", long(ns2ms(end)) - long(ns2ms(start)));
+                    ALOGD("[UI] pExynosHdmi->flush[end-start] = %ld ms", long(ns2ms(end)) - long(ns2ms(start)));
 #endif
                     break;
                 case HDMI_MODE_VIDEO:
 #ifdef CHECK_VIDEO_TIME
                     start = systemTime();
 #endif
-                    if (pSecHdmi->flush(mSrcWidth, mSrcHeight, mSrcColorFormat, mSrcYAddr, mSrcCbAddr, mSrcCrAddr,
+                    if (pExynosHdmi->flush(mSrcWidth, mSrcHeight, mSrcColorFormat, mSrcYAddr, mSrcCbAddr, mSrcCrAddr,
                                 mDstX, mDstY, mHdmiLayer, mHdmiMode, mflag_full_display) == false) {
-                        ALOGE("%s::pSecHdmi->flush() fail on HDMI_MODE_VIDEO", __func__);
+                        ALOGE("%s::pExynosHdmi->flush() fail on HDMI_MODE_VIDEO", __func__);
                         ret = false;
                     }
 #ifdef CHECK_VIDEO_TIME
                     end = systemTime();
-                    ALOGD("[VIDEO] pSecHdmi->flush[end-start] = %ld ms", long(ns2ms(end)) - long(ns2ms(start)));
+                    ALOGD("[VIDEO] pExynosHdmi->flush[end-start] = %ld ms", long(ns2ms(end)) - long(ns2ms(start)));
 #endif
                     break;
                 default:

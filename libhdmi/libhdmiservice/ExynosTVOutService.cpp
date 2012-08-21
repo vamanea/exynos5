@@ -22,7 +22,7 @@
 ** @date    2011-07-06
 */
 
-#define LOG_TAG "SecTVOutService"
+#define LOG_TAG "ExynosTVOutService"
 
 #include <binder/IServiceManager.h>
 #include <utils/RefBase.h>
@@ -58,7 +58,7 @@ namespace android {
         SET_HDMI_LAYER_DISABLE
     };
 
-    int SecTVOutService::HdmiFlushThreadForUI()
+    int ExynosTVOutService::HdmiFlushThreadForUI()
     {
         while (!mExitHdmiFlushThreadForUI) {
             pthread_mutex_lock(&sync_mutex_ui);
@@ -69,7 +69,7 @@ namespace android {
             struct timeval hdmi_start, hdmi_end;
             gettimeofday(&hdmi_start, NULL);
 #endif
-            if (mSecHdmi.flush(mMsgForUI->mSrcWidth,
+            if (mExynosHdmi.flush(mMsgForUI->mSrcWidth,
                         mMsgForUI->mSrcHeight,
                         mMsgForUI->mSrcColorFormat,
                         mMsgForUI->mSrcYAddr,
@@ -80,7 +80,7 @@ namespace android {
                         mMsgForUI->mHdmiLayer,
                         mMsgForUI->mHdmiMode,
                         mMsgForUI->mflag_full_display) == false)
-                ALOGE("%s::mSecHdmi.flush() on HDMI_MODE_UI fail", __func__);
+                ALOGE("%s::mExynosHdmi.flush() on HDMI_MODE_UI fail", __func__);
 
 #ifdef CHECK_UI_TIME
             gettimeofday(&hdmi_end, NULL);
@@ -91,7 +91,7 @@ namespace android {
         return 0;
     }
 
-    int SecTVOutService::HdmiFlushThreadForVIDEO()
+    int ExynosTVOutService::HdmiFlushThreadForVIDEO()
     {
         while (!mExitHdmiFlushThreadForVIDEO) {
             pthread_mutex_lock(&sync_mutex_video);
@@ -102,7 +102,7 @@ namespace android {
             struct timeval hdmi_start, hdmi_end;
             gettimeofday(&hdmi_start, NULL);
 #endif
-            if (mSecHdmi.flush(mMsgForVideo->mSrcWidth,
+            if (mExynosHdmi.flush(mMsgForVideo->mSrcWidth,
                         mMsgForVideo->mSrcHeight,
                         mMsgForVideo->mSrcColorFormat,
                         mMsgForVideo->mSrcYAddr,
@@ -113,7 +113,7 @@ namespace android {
                         mMsgForVideo->mHdmiLayer,
                         mMsgForVideo->mHdmiMode,
                         mMsgForVideo->mflag_full_display) == false)
-                ALOGE("%s::mSecHdmi.flush() on HDMI_MODE_VIDEO fail", __func__);
+                ALOGE("%s::mExynosHdmi.flush() on HDMI_MODE_VIDEO fail", __func__);
 
 #ifdef CHECK_VIDEO_TIME
             gettimeofday(&hdmi_end, NULL);
@@ -125,19 +125,19 @@ namespace android {
     }
 
 
-    int SecTVOutService::instantiate()
+    int ExynosTVOutService::instantiate()
     {
-        ALOGD("SecTVOutService instantiate");
-        int r = defaultServiceManager()->addService(String16( "SecTVOutService"), new SecTVOutService ());
-        ALOGD("SecTVOutService r=%d", r);
+        ALOGD("ExynosTVOutService instantiate");
+        int r = defaultServiceManager()->addService(String16( "ExynosTVOutService"), new ExynosTVOutService ());
+        ALOGD("ExynosTVOutService r=%d", r);
 
         return r;
     }
 
-    SecTVOutService::SecTVOutService () {
-        ALOGV("SecTVOutService created");
+    ExynosTVOutService::ExynosTVOutService () {
+        ALOGV("ExynosTVOutService created");
         mHdmiCableInserted = false;
-        mUILayerMode = SecHdmi::HDMI_LAYER_GRAPHIC_0;
+        mUILayerMode = ExynosHdmi::HDMI_LAYER_GRAPHIC_0;
         mHdmiPath = DEFAULT_UI_PATH;
         mHdmiResolution = DEFAULT_HDMI_RESOLUTION_VALUE;
         mHdmis3dMode = HDMI_2D;
@@ -154,13 +154,13 @@ namespace android {
         pthread_cond_init(&sync_cond_ui, NULL);
         pthread_mutex_init(&sync_mutex_ui, NULL);
 
-        if (mSecHdmi.create(mLCD_width, mLCD_height) == false)
-            ALOGE("%s::mSecHdmi.create() fail", __func__);
+        if (mExynosHdmi.create(mLCD_width, mLCD_height) == false)
+            ALOGE("%s::mExynosHdmi.create() fail", __func__);
         else
             setHdmiStatus(1, true);
     }
 
-    void SecTVOutService::setLCDsize(void) {
+    void ExynosTVOutService::setLCDsize(void) {
             char const * const device_template[] = {
                 "/dev/graphics/fb%u",
                 "/dev/fb%u",
@@ -189,8 +189,8 @@ namespace android {
             return;
     }
 
-    SecTVOutService::~SecTVOutService () {
-        ALOGV ("SecTVOutService destroyed");
+    ExynosTVOutService::~ExynosTVOutService () {
+        ALOGV ("ExynosTVOutService destroyed");
 
         if (mHdmiFlushThreadForUI != NULL) {
             mHdmiFlushThreadForUI->requestExit();
@@ -207,7 +207,7 @@ namespace android {
         }
     }
 
-    status_t SecTVOutService::onTransact(uint32_t code, const Parcel & data, Parcel * reply, uint32_t flags)
+    status_t ExynosTVOutService::onTransact(uint32_t code, const Parcel & data, Parcel * reply, uint32_t flags)
     {
         switch (code) {
         case SET_HDMI_STATUS: {
@@ -295,7 +295,7 @@ namespace android {
         return NO_ERROR;
     }
 
-    void SecTVOutService::setHdmiStatus(uint32_t status, bool isBooting)
+    void ExynosTVOutService::setHdmiStatus(uint32_t status, bool isBooting)
     {
         //ALOGD("%s HDMI cable status = %d", __func__, status);
         {
@@ -307,13 +307,13 @@ namespace android {
                 return;
 
             if (hdmiCableInserted == true) {
-                if (mSecHdmi.connect() == false) {
-                    ALOGE("%s::mSecHdmi.connect() fail", __func__);
+                if (mExynosHdmi.connect() == false) {
+                    ALOGE("%s::mExynosHdmi.connect() fail", __func__);
                     hdmiCableInserted = false;
                 }
             } else {
-                if (mSecHdmi.disconnect() == false)
-                    ALOGE("%s::mSecHdmi.disconnect() fail", __func__);
+                if (mExynosHdmi.disconnect() == false)
+                    ALOGE("%s::mExynosHdmi.disconnect() fail", __func__);
             }
 
             mHdmiCableInserted = hdmiCableInserted;
@@ -328,7 +328,7 @@ namespace android {
         }
     }
 
-    uint32_t SecTVOutService::getHdmiCableStatus()
+    uint32_t ExynosTVOutService::getHdmiCableStatus()
     {
         Mutex::Autolock _l(mLock);
 
@@ -336,18 +336,18 @@ namespace android {
         return hdmiCableInserted();
     }
 
-    void SecTVOutService::setHdmiMode(uint32_t mode)
+    void ExynosTVOutService::setHdmiMode(uint32_t mode)
     {
         //ALOGD("%s TV mode = %d", __func__, mode);
         Mutex::Autolock _l(mLock);
 
-        if ((hdmiCableInserted() == true) && (mSecHdmi.setHdmiOutputMode(mode)) == false) {
-            ALOGE("%s::mSecHdmi.setHdmiOutputMode() fail", __func__);
+        if ((hdmiCableInserted() == true) && (mExynosHdmi.setHdmiOutputMode(mode)) == false) {
+            ALOGE("%s::mExynosHdmi.setHdmiOutputMode() fail", __func__);
             return;
         }
     }
 
-    void SecTVOutService::setHdmiResolution(uint32_t resolution, HDMI_S3D_MODE s3dMode)
+    void ExynosTVOutService::setHdmiResolution(uint32_t resolution, HDMI_S3D_MODE s3dMode)
     {
         //ALOGD("%s TV resolution = %d s3dMode = %d", __func__, resolution, s3dMode);
         Mutex::Autolock _l(mLock);
@@ -359,35 +359,35 @@ namespace android {
         mHdmiResolution = resolution;
         mHdmis3dMode    = s3dMode;
 
-        if ((hdmiCableInserted() == true) && (mSecHdmi.setHdmiResolution(resolution, s3dMode)) == false) {
-            ALOGE("%s::mSecHdmi.setHdmiResolution() fail", __func__);
+        if ((hdmiCableInserted() == true) && (mExynosHdmi.setHdmiResolution(resolution, s3dMode)) == false) {
+            ALOGE("%s::mExynosHdmi.setHdmiResolution() fail", __func__);
             return;
         }
     }
 
-    void SecTVOutService::setHdmiHdcp(uint32_t hdcp_en)
+    void ExynosTVOutService::setHdmiHdcp(uint32_t hdcp_en)
     {
         //ALOGD("%s TV HDCP = %d", __func__, hdcp_en);
         Mutex::Autolock _l(mLock);
 
-        if ((hdmiCableInserted() == true) && (mSecHdmi.setHdcpMode(hdcp_en)) == false) {
-            ALOGE("%s::mSecHdmi.setHdcpMode() fail", __func__);
+        if ((hdmiCableInserted() == true) && (mExynosHdmi.setHdcpMode(hdcp_en)) == false) {
+            ALOGE("%s::mExynosHdmi.setHdcpMode() fail", __func__);
             return;
         }
     }
 
-    void SecTVOutService::setHdmiRotate(uint32_t rotVal, uint32_t hwcLayer)
+    void ExynosTVOutService::setHdmiRotate(uint32_t rotVal, uint32_t hwcLayer)
     {
         //ALOGD("%s TV ROTATE = %d", __func__, rotVal);
         Mutex::Autolock _l(mLock);
 
-        if ((hdmiCableInserted() == true) && (mSecHdmi.setUIRotation(rotVal, hwcLayer)) == false) {
-            ALOGE("%s::mSecHdmi.setUIRotation() fail", __func__);
+        if ((hdmiCableInserted() == true) && (mExynosHdmi.setUIRotation(rotVal, hwcLayer)) == false) {
+            ALOGE("%s::mExynosHdmi.setUIRotation() fail", __func__);
             return;
         }
     }
 
-    void SecTVOutService::setHdmiHwcLayer(uint32_t hwcLayer)
+    void ExynosTVOutService::setHdmiHwcLayer(uint32_t hwcLayer)
     {
         //ALOGD("%s TV HWCLAYER = %d", __func__, hwcLayer);
         Mutex::Autolock _l(mLock);
@@ -396,23 +396,23 @@ namespace android {
         return;
     }
 
-    void SecTVOutService::setHdmiClearLayer(uint32_t enable)
+    void ExynosTVOutService::setHdmiClearLayer(uint32_t enable)
     {
         Mutex::Autolock _l(mLock);
 
         if (enable == 0) {
-            if (mSecHdmi.clearHdmiWriteBack() == false)
-                ALOGE("%s::mSecHdmi.clearHdmiWriteBack() fail", __func__);
+            if (mExynosHdmi.clearHdmiWriteBack() == false)
+                ALOGE("%s::mExynosHdmi.clearHdmiWriteBack() fail", __func__);
 
-            for (int layer = SecHdmi::HDMI_LAYER_BASE + 1; layer < SecHdmi::HDMI_LAYER_MAX; layer++)
-                if (mSecHdmi.clear(layer) == false)
-                    ALOGE("%s::mSecHdmi.clear(%d) fail", __func__, layer);
+            for (int layer = ExynosHdmi::HDMI_LAYER_BASE + 1; layer < ExynosHdmi::HDMI_LAYER_MAX; layer++)
+                if (mExynosHdmi.clear(layer) == false)
+                    ALOGE("%s::mExynosHdmi.clear(%d) fail", __func__, layer);
         }
         mEnable = enable;
         return;
     }
 
-    void SecTVOutService::setHdmiPath(uint32_t path)
+    void ExynosTVOutService::setHdmiPath(uint32_t path)
     {
         //ALOGD("%s HdmiPath = %d", __func__, path);
         Mutex::Autolock _l(mLock);
@@ -420,8 +420,8 @@ namespace android {
         if (mHdmiPath == path)
             return;
 
-        if (mSecHdmi.setHdmiPath(path) == false) {
-            ALOGE("%s::mSecHdmi.setHdmiPath(%d) fail", __func__, path);
+        if (mExynosHdmi.setHdmiPath(path) == false) {
+            ALOGE("%s::mExynosHdmi.setHdmiPath(%d) fail", __func__, path);
             return;
         }
         mHdmiPath = path;
@@ -429,20 +429,20 @@ namespace android {
         return;
     }
 
-    void SecTVOutService::setHdmiDRM(uint32_t drmMode)
+    void ExynosTVOutService::setHdmiDRM(uint32_t drmMode)
     {
         //ALOGD("%s HdmiDrmMode = %d", __func__, drmMode);
         Mutex::Autolock _l(mLock);
 
-        if (mSecHdmi.setHdmiDrmMode(drmMode) == false) {
-            ALOGE("%s::mSecHdmi.setHdmiDrmMode(%d) fail", __func__, drmMode);
+        if (mExynosHdmi.setHdmiDrmMode(drmMode) == false) {
+            ALOGE("%s::mExynosHdmi.setHdmiDrmMode(%d) fail", __func__, drmMode);
             return;
         }
 
         return;
     }
 
-    void SecTVOutService::blit2Hdmi(uint32_t w, uint32_t h, uint32_t colorFormat,
+    void ExynosTVOutService::blit2Hdmi(uint32_t w, uint32_t h, uint32_t colorFormat,
             uint32_t pPhyYAddr, uint32_t pPhyCbAddr, uint32_t pPhyCrAddr,
             uint32_t dstX, uint32_t dstY,
             uint32_t hdmiMode,
@@ -453,21 +453,21 @@ namespace android {
         if (hdmiCableInserted() == false)
             return;
 
-        int hdmiLayer = SecHdmi::HDMI_LAYER_VIDEO;
+        int hdmiLayer = ExynosHdmi::HDMI_LAYER_VIDEO;
 
         switch (hdmiMode) {
             case HDMI_MODE_MIRROR:
 #if !defined(BOARD_USES_HDMI_SUBTITLES)
                 if ((mHwcLayer == 0) && (mHdmiPath == HDMI_PATH_WRITEBACK))
-                    hdmiLayer = SecHdmi::HDMI_LAYER_GRAPHIC_0;
+                    hdmiLayer = ExynosHdmi::HDMI_LAYER_GRAPHIC_0;
                 else
                     return;
 #else
-                hdmiLayer = SecHdmi::HDMI_LAYER_GRAPHIC_0;
+                hdmiLayer = ExynosHdmi::HDMI_LAYER_GRAPHIC_0;
 #endif
 
                 pthread_mutex_lock(&sync_mutex_ui);
-                mMsgForUI = new SecHdmiEventMsg(&mSecHdmi, w, h, colorFormat, pPhyYAddr, pPhyCbAddr, pPhyCrAddr,
+                mMsgForUI = new ExynosHdmiEventMsg(&mExynosHdmi, w, h, colorFormat, pPhyYAddr, pPhyCbAddr, pPhyCrAddr,
                         dstX, dstY, hdmiLayer, flag_full_display, hdmiMode);
                 pthread_cond_signal(&sync_cond_ui);
                 pthread_mutex_unlock(&sync_mutex_ui);
@@ -478,10 +478,10 @@ namespace android {
                     ALOGE("HDMI_MODE_UI_0 should not use HDMI_PATH_WRITEBACK\n");
                     break;
                 }
-                hdmiLayer = SecHdmi::HDMI_LAYER_GRAPHIC_0;
+                hdmiLayer = ExynosHdmi::HDMI_LAYER_GRAPHIC_0;
 
                 pthread_mutex_lock(&sync_mutex_ui);
-                mMsgForUI = new SecHdmiEventMsg(&mSecHdmi, w, h, colorFormat, pPhyYAddr, pPhyCbAddr, pPhyCrAddr,
+                mMsgForUI = new ExynosHdmiEventMsg(&mExynosHdmi, w, h, colorFormat, pPhyYAddr, pPhyCbAddr, pPhyCrAddr,
                         dstX, dstY, hdmiLayer, flag_full_display, hdmiMode);
                 pthread_cond_signal(&sync_cond_ui);
                 pthread_mutex_unlock(&sync_mutex_ui);
@@ -492,9 +492,9 @@ namespace android {
                     ALOGE("HDMI_MODE_UI_1 should not use HDMI_PATH_WRITEBACK\n");
                     break;
                 }
-                hdmiLayer = SecHdmi::HDMI_LAYER_GRAPHIC_1;
+                hdmiLayer = ExynosHdmi::HDMI_LAYER_GRAPHIC_1;
                 pthread_mutex_lock(&sync_mutex_ui);
-                mMsgForUI = new SecHdmiEventMsg(&mSecHdmi, w, h, colorFormat, pPhyYAddr, pPhyCbAddr, pPhyCrAddr,
+                mMsgForUI = new ExynosHdmiEventMsg(&mExynosHdmi, w, h, colorFormat, pPhyYAddr, pPhyCbAddr, pPhyCrAddr,
                         dstX, dstY, hdmiLayer, flag_full_display, hdmiMode);
                 pthread_cond_signal(&sync_cond_ui);
                 pthread_mutex_unlock(&sync_mutex_ui);
@@ -507,8 +507,8 @@ namespace android {
                 }
 
                 pthread_mutex_lock(&sync_mutex_video);
-                mMsgForVideo = new SecHdmiEventMsg(&mSecHdmi, w, h, colorFormat, pPhyYAddr, pPhyCbAddr, pPhyCrAddr,
-                        dstX, dstY, SecHdmi::HDMI_LAYER_VIDEO, flag_full_display, HDMI_MODE_VIDEO);
+                mMsgForVideo = new ExynosHdmiEventMsg(&mExynosHdmi, w, h, colorFormat, pPhyYAddr, pPhyCbAddr, pPhyCrAddr,
+                        dstX, dstY, ExynosHdmi::HDMI_LAYER_VIDEO, flag_full_display, HDMI_MODE_VIDEO);
 
                 pthread_cond_signal(&sync_cond_video);
                 pthread_mutex_unlock(&sync_mutex_video);
@@ -522,17 +522,17 @@ namespace android {
         return;
     }
 
-    void SecTVOutService::setHdmiLayerEnable(uint32_t hdmiLayer)
+    void ExynosTVOutService::setHdmiLayerEnable(uint32_t hdmiLayer)
     {
-        mSecHdmi.setHdmiLayerEnable(hdmiLayer);
+        mExynosHdmi.setHdmiLayerEnable(hdmiLayer);
     }
 
-    void SecTVOutService::setHdmiLayerDisable(uint32_t hdmiLayer)
+    void ExynosTVOutService::setHdmiLayerDisable(uint32_t hdmiLayer)
     {
-        mSecHdmi.setHdmiLayerDisable(hdmiLayer);
+        mExynosHdmi.setHdmiLayerDisable(hdmiLayer);
     }
 
-    bool SecTVOutService::hdmiCableInserted(void)
+    bool ExynosTVOutService::hdmiCableInserted(void)
     {
         return mHdmiCableInserted;
     }

@@ -37,7 +37,7 @@ extern void check_fps();
 #endif
 
 #if defined(BOARD_USES_HDMI)
-#include "SecHdmiClient.h"
+#include "ExynosHdmiClient.h"
 #include "ExynosTVOutService.h"
 #include "ExynosHdmi.h"
 
@@ -470,7 +470,7 @@ static int check_gralloc_usage_flags(struct hwc_context_t *ctx, hwc_layer_list_t
     usage_3d = NOT_DEFINED;
     is_same_3d_usage = true;
 
-    for (int i = 0; i < android::SecHdmiClient::HDMI_LAYER_MAX; i++)
+    for (int i = 0; i < android::ExynosHdmiClient::HDMI_LAYER_MAX; i++)
         ctx->hdmi_layer_buf_index[i] = NOT_DEFINED;
 
     for (int i = 0; i < list->numHwLayers ; i++) {
@@ -1042,7 +1042,7 @@ static int hwc_prepare(hwc_composer_device_t *dev, hwc_layer_list_t* list)
         if (ctx->num_of_ext_disp_video_layer >= 2) {
         } else if ((compositionType == HWC_OVERLAY) &&
                 (prev_handle->usage & GRALLOC_USAGE_EXTERNAL_DISP)) {
-            ctx->hdmi_layer_buf_index[android::SecHdmiClient::HDMI_LAYER_VIDEO] = i;
+            ctx->hdmi_layer_buf_index[android::ExynosHdmiClient::HDMI_LAYER_VIDEO] = i;
         } else if (prev_handle != NULL) {
         }
 #endif
@@ -1051,7 +1051,7 @@ static int hwc_prepare(hwc_composer_device_t *dev, hwc_layer_list_t* list)
 #if defined(BOARD_USES_HDMI)
     if (ctx->num_of_ext_disp_video_layer > 1) {
         ctx->mHdmiClient->setHdmiHwcLayer(0);
-        ctx->hdmi_layer_buf_index[android::SecHdmiClient::HDMI_LAYER_GRAPHIC_0] = NOT_DEFINED;
+        ctx->hdmi_layer_buf_index[android::ExynosHdmiClient::HDMI_LAYER_GRAPHIC_0] = NOT_DEFINED;
     } else {
         ctx->mHdmiClient->setHdmiHwcLayer(ctx->num_of_ext_disp_layer);
     }
@@ -1059,40 +1059,40 @@ static int hwc_prepare(hwc_composer_device_t *dev, hwc_layer_list_t* list)
     if ((ctx->num_of_hwc_layer == 1) && (get_hwc_num_of_yuv_layers(ctx, list) == 1)) {
         ctx->mHdmiClient->setHdmiPath(HDMI_PATH_OVERLAY);
         if (ctx->num_of_protected_layer)
-            ctx->mHdmiClient->setHdmiDRM(android::SecHdmiClient::HDMI_DRM_MODE);
+            ctx->mHdmiClient->setHdmiDRM(android::ExynosHdmiClient::HDMI_DRM_MODE);
         else
-            ctx->mHdmiClient->setHdmiDRM(android::SecHdmiClient::HDMI_NON_DRM_MODE);
+            ctx->mHdmiClient->setHdmiDRM(android::ExynosHdmiClient::HDMI_NON_DRM_MODE);
     } else {
         if (!ctx->num_of_ext_disp_layer)
             ctx->mHdmiClient->setHdmiPath(DEFAULT_UI_PATH);
         else
             ctx->mHdmiClient->setHdmiPath(HDMI_PATH_OVERLAY);
-        ctx->mHdmiClient->setHdmiDRM(android::SecHdmiClient::HDMI_NON_DRM_MODE);
+        ctx->mHdmiClient->setHdmiDRM(android::ExynosHdmiClient::HDMI_NON_DRM_MODE);
     }
 
     if ((ctx->num_of_s3d_layer > 0) && is_same_3d_usage) {
         if ((usage_3d & GRALLOC_USAGE_PRIVATE_SBS_LR) ||
             (usage_3d & GRALLOC_USAGE_PRIVATE_SBS_RL)) {
             ctx->mHdmiClient->setHdmiResolution(DEFAULT_HDMI_RESOLUTION_VALUE_S3D_SBS,
-                                                android::SecHdmiClient::HDMI_S3D_SBS);
+                                                android::ExynosHdmiClient::HDMI_S3D_SBS);
         } else if((usage_3d & GRALLOC_USAGE_PRIVATE_TB_LR) ||
                   (usage_3d & GRALLOC_USAGE_PRIVATE_TB_RL)) {
             ctx->mHdmiClient->setHdmiResolution(DEFAULT_HDMI_RESOLUTION_VALUE_S3D_TB,
-                                                android::SecHdmiClient::HDMI_S3D_TB);
+                                                android::ExynosHdmiClient::HDMI_S3D_TB);
         } else
-            ctx->mHdmiClient->setHdmiResolution(0, android::SecHdmiClient::HDMI_2D);
+            ctx->mHdmiClient->setHdmiResolution(0, android::ExynosHdmiClient::HDMI_2D);
     } else
-        ctx->mHdmiClient->setHdmiResolution(0, android::SecHdmiClient::HDMI_2D);
+        ctx->mHdmiClient->setHdmiResolution(0, android::ExynosHdmiClient::HDMI_2D);
 
     if ((ctx->num_of_ext_disp_layer == 0) ||
         (ctx->num_of_ext_disp_video_layer == 0 && ctx->num_of_ext_disp_layer >= 2) ||
         (ctx->num_of_ext_disp_video_layer > 1) ||
-        (ctx->hdmi_layer_buf_index[android::SecHdmiClient::HDMI_LAYER_GRAPHIC_0] != NOT_DEFINED)) {
+        (ctx->hdmi_layer_buf_index[android::ExynosHdmiClient::HDMI_LAYER_GRAPHIC_0] != NOT_DEFINED)) {
     } else
-        ctx->mHdmiClient->setHdmiLayerDisable(android::SecHdmiClient::HDMI_LAYER_GRAPHIC_0);
+        ctx->mHdmiClient->setHdmiLayerDisable(android::ExynosHdmiClient::HDMI_LAYER_GRAPHIC_0);
 
-    if (ctx->hdmi_layer_buf_index[android::SecHdmiClient::HDMI_LAYER_VIDEO] == NOT_DEFINED)
-        ctx->mHdmiClient->setHdmiLayerDisable(android::SecHdmiClient::HDMI_LAYER_VIDEO);
+    if (ctx->hdmi_layer_buf_index[android::ExynosHdmiClient::HDMI_LAYER_VIDEO] == NOT_DEFINED)
+        ctx->mHdmiClient->setHdmiLayerDisable(android::ExynosHdmiClient::HDMI_LAYER_VIDEO);
 
 #endif
 
@@ -1361,7 +1361,7 @@ static int hwc_set(hwc_composer_device_t *dev,
                 }
 
 #if defined(BOARD_USES_HDMI)
-                if (ctx->hdmi_layer_buf_index[android::SecHdmiClient::HDMI_LAYER_VIDEO] == win->layer_index) {
+                if (ctx->hdmi_layer_buf_index[android::ExynosHdmiClient::HDMI_LAYER_VIDEO] == win->layer_index) {
 
                     /* DRM contents should not use ARM memcpy.
                      * If hdmi resolution is 1080930, it use ARM memcpy to avoid tearing
@@ -1386,7 +1386,7 @@ static int hwc_set(hwc_composer_device_t *dev,
                                 src_img.base + src_img.uoffset,
                                 src_img.base + src_img.uoffset + src_img.voffset,
                                 0, 0,
-                                android::SecHdmiClient::HDMI_MODE_VIDEO,
+                                android::ExynosHdmiClient::HDMI_MODE_VIDEO,
                                 1);
                     }
                 }
@@ -1716,7 +1716,7 @@ static int hwc_device_open(const struct hw_module_t* module, const char* name,
     }
 
 #if defined(BOARD_USES_HDMI)
-    dev->mHdmiClient = android::SecHdmiClient::getInstance();
+    dev->mHdmiClient = android::ExynosHdmiClient::getInstance();
 #endif
 
 #ifdef    VSYNC_THREAD_ENABLE
