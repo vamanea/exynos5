@@ -1171,7 +1171,7 @@ static int hwc_set(hwc_composer_device_t *dev,
     struct sec_rect src_work_rect;
     struct sec_rect dst_work_rect;
 
-    int skip_csc_rendering = 0;
+    int skip_lay_rendering[NUM_OF_WIN];
 #if defined(USE_HWC_CSC_THREAD)
     int counter;
 #endif
@@ -1239,6 +1239,9 @@ static int hwc_set(hwc_composer_device_t *dev,
     }
     ctx->num_of_fb_layer_prev = ctx->num_of_fb_layer;
 
+    for (int i = 0; i < NUM_OF_WIN; i++)
+        skip_lay_rendering[i] = 0;
+
     if ((ctx->num_of_hwc_layer <= 0) && (ctx->gsc_mode == GSC_OUTPUT_MODE)) {
         for (int i = 0; i < 1; i++) {  /* to do : for multiple windows */
             if (ctx->win[i].is_gsc_started) {
@@ -1267,12 +1270,10 @@ static int hwc_set(hwc_composer_device_t *dev,
                      */
                     SEC_HWC_Log(HWC_LOG_DEBUG, "HWC:SKIP GSC rendering for Layer%d", win->layer_index);
 
-                    if (win->ovly_lay_type == HWC_YUV_OVLY)
-                        skip_csc_rendering = 1;
+                    skip_lay_rendering[i] = 1;
                     continue;
                 }
-                if (win->ovly_lay_type == HWC_YUV_OVLY)
-                    skip_csc_rendering = 0;
+                skip_lay_rendering[i] = 0;
 
                 ctx->layer_prev_buf[i] = (uint32_t)cur->handle;
                 // initialize the src & dist context for gsc & g2d
@@ -1321,13 +1322,7 @@ static int hwc_set(hwc_composer_device_t *dev,
                         skipped_window_mask |= (1 << i);
                         continue;
                     }
-
-                    window_pan_display(win);
-                    win->buf_index = (win->buf_index + 1) % NUM_OF_WIN_BUF;
-                    if (win->power_state == 0)
-                        window_show(win);
-                    }
-                else {
+                } else {
 #endif
                 if (i > 0) { //dual video scenario
                     if ((ctx->win[i - 1].gsc_mode == GSC_M2M_MODE) &&
@@ -1427,6 +1422,17 @@ static int hwc_set(hwc_composer_device_t *dev,
 #endif
     }
 
+    for (int i = 0; i < ctx->num_of_hwc_layer; i++) {
+        win = &ctx->win[i];
+        if ((win->status == HWC_WIN_RESERVED) &&
+            (skip_lay_rendering[i] == 0) && (win->ovly_lay_type == HWC_RGB_OVLY)) {
+                    window_pan_display(win);
+                    win->buf_index = (win->buf_index + 1) % NUM_OF_WIN_BUF;
+                    if (win->power_state == 0)
+                        window_show(win);
+        }
+    }
+
     if (need_swap_buffers) {
         if (sur == NULL || dpy == NULL){
             return HWC_EGL_ERROR;
@@ -1461,7 +1467,7 @@ static int hwc_set(hwc_composer_device_t *dev,
     if (ctx->num_of_hwc_layer > 0 ) {
         for (int i = 0; i < ctx->num_of_hwc_layer; i++) {
             if (ctx->win[i].ovly_lay_type == HWC_YUV_OVLY) {
-                if ((ctx->win[i].is_gsc_started) && (skip_csc_rendering == 0)) {
+                if ((ctx->win[i].is_gsc_started) && (skip_lay_rendering[i] == 0)) {
                     if (exynos_gsc_wait_done(ctx->gsc_handle) < 0) {
                         SEC_HWC_Log(HWC_LOG_ERROR, "%s:: error : exynos_gsc_wait_done", __func__);
                     }
