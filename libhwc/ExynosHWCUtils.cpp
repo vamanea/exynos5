@@ -474,7 +474,7 @@ int runCompositor(struct hwc_context_t *ctx,
         if (g2d_bytes == 1) {
             srcImage.plane2.type = addr_type;
             srcImage.plane2.start =
-                (long unsigned)(src_img->paddr + src_img->uoffset);
+                (long unsigned)(src_img->uaddr);
         }
 
         srcImage.width = src_img->f_w;
@@ -505,7 +505,7 @@ int runCompositor(struct hwc_context_t *ctx,
         if (g2d_bytes == 1) {
             dstImage.plane2.type = addr_type;
             dstImage.plane2.start =
-                (long unsigned)(dst_img->paddr + dst_img->uoffset);
+                (long unsigned)(dst_img->uaddr);
         }
 
         dstImage.width = dst_img->f_w;

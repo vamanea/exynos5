@@ -118,11 +118,11 @@ struct sec_img {
     uint32_t w;
     uint32_t h;
     uint32_t format;
-    uint32_t base;
+    uint32_t yaddr;
     uint32_t offset;
     uint32_t paddr;
-    uint32_t uoffset;
-    uint32_t voffset;
+    uint32_t uaddr;
+    uint32_t vaddr;
     int      usage;
     int      mem_id;
 };

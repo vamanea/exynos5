@@ -241,13 +241,11 @@ static int set_src_dst_img_rect(hwc_layer_t *cur,
     src_img->w       = prev_handle->width;
     src_img->h       = prev_handle->height;
     src_img->format  = prev_handle->format;
-    src_img->base    = EXYNOS_GET_SRC_ADDR(prev_handle);
     src_img->offset  = 0;
     src_img->mem_id  = 0;
     src_img->paddr  = 0;
     src_img->usage  = prev_handle->usage;
-    src_img->uoffset  = prev_handle->uoffset;
-    src_img->voffset  = prev_handle->voffset;
+    EXYNOS_GET_SRC_ADDR(prev_handle, &src_img->yaddr, &src_img->uaddr, &src_img->vaddr);
 
     switch (src_img->format) {
     case HAL_PIXEL_FORMAT_YV12:
@@ -283,7 +281,7 @@ static int set_src_dst_img_rect(hwc_layer_t *cur,
         break;
     }
 
-    dst_img->base     = win->virt_addr[win->buf_index];
+    dst_img->yaddr     = win->virt_addr[win->buf_index];
     dst_img->offset   = 0;
     dst_img->mem_id   = 0;
 
@@ -339,8 +337,8 @@ static int set_src_dst_img_rect(hwc_layer_t *cur,
             "   SRC_RECT x(%d),y(%d),w(%d),h(%d)=>"
             "DST_RECT x(%d),y(%d),w(%d),h(%d)",
             src_img->w, src_img->h, src_img->f_w, src_img->f_h, src_img->format,
-            src_img->base, src_img->offset, src_img->paddr,
-            dst_img->w, dst_img->h,  dst_img->format, dst_img->base,
+            src_img->yaddr, src_img->offset, src_img->paddr,
+            dst_img->w, dst_img->h,  dst_img->format, dst_img->yaddr,
             dst_img->offset, dst_img->mem_id,
             cur->transform, win_idx,
             src_rect->x, src_rect->y, src_rect->w, src_rect->h,
@@ -621,9 +619,9 @@ static int get_hwc_compos_decision(struct hwc_context_t *ctx, hwc_layer_t* cur, 
     SEC_HWC_Log(HWC_LOG_DEBUG,
             "%s::compositionType(%d)=>0:FB,1:OVERLAY \r\n"
             "format(0x%x)"
-            "b_addr(0x%x),usage(%d),w(%d),h(%d),bpp(%d)",
+            "usage(%d),w(%d),h(%d),bpp(%d)",
             "get_hwc_compos_decision()", compositionType,
-            prev_handle->format, prev_handle->base,
+            prev_handle->format,
             prev_handle->usage, prev_handle->width, prev_handle->height,
             prev_handle->bpp);
 
@@ -1121,9 +1119,9 @@ static void src_dst_img_info_gsc_out(struct sec_img *src_img,
     src_info->fw = src_img->f_w;
     src_info->fh = src_img->f_h;
     src_info->format = src_img->format;
-    src_info->yaddr = src_img->base;
-    src_info->uaddr = src_img->base + src_img->uoffset;
-    src_info->vaddr = src_img->base + src_img->uoffset + src_img->voffset;
+    src_info->yaddr = src_img->yaddr;
+    src_info->uaddr = src_img->uaddr;
+    src_info->vaddr = src_img->vaddr;
     src_info->rot = 0;
     src_info->cacheable = 1;
     src_info->drmMode = 0;
@@ -1137,7 +1135,7 @@ static void src_dst_img_info_gsc_out(struct sec_img *src_img,
     dst_info->fw = dst_img->f_w;
     dst_info->fh = dst_img->f_h;
     dst_info->format = dst_img->format;
-    dst_info->yaddr = dst_img->base;
+    dst_info->yaddr = dst_img->yaddr;
     dst_info->uaddr = 0;
     dst_info->vaddr = 0;
     dst_info->rot = rot;
@@ -1275,8 +1273,8 @@ static int hwc_set(hwc_composer_device_t *dev,
                     uint32_t winPhysAddr;
 
                     addr_type = ADDR_USER;
-                    src_img.paddr = src_img.base;
-                    dst_img.paddr = dst_img.base;
+                    src_img.paddr = src_img.yaddr;
+                    dst_img.paddr = dst_img.yaddr;
 #ifdef USE_VSYNC_FOR_RGB_OVERLAY
                     winPhysAddr = 0;
                     if (ioctl(win->fd, S3CFB_GET_CUR_WIN_BUF_ADDR,
@@ -1364,9 +1362,9 @@ static int hwc_set(hwc_composer_device_t *dev,
                         (src_img.format == HAL_PIXEL_FORMAT_YV12)) {
                         ctx->mHdmiClient->blit2Hdmi(src_work_rect.w, src_work_rect.h,
                                 src_img.format,
-                                src_img.base,
-                                src_img.base + src_img.uoffset,
-                                src_img.base + src_img.uoffset + src_img.voffset,
+                                src_img.yaddr,
+                                src_img.uaddr,
+                                src_img.vaddr,
                                 0, 0,
                                 android::ExynosHdmiClient::HDMI_MODE_VIDEO,
                                 1);
