@@ -80,7 +80,7 @@
 #endif
 
 #define NOT_DEFINED         -1
-
+#define NUM_OVLY_DELAY_FRAMES   (4)
 
 #define PP_DEVICE_DEV_NAME  "/dev/video23"  /*GSC0*/
 
@@ -226,6 +226,7 @@ struct hwc_context_t {
     pthread_t                 vsync_thread;
 #endif
     int     need_to_try_overlay;
+    int     overaly_delay_frames;
 };
 
 typedef enum _LOG_LEVEL {

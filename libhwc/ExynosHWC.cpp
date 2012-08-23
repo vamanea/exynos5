@@ -669,8 +669,14 @@ static int assign_overlay_window(struct hwc_context_t *ctx, hwc_layer_t *cur,
 
     calculate_rect(win, cur, &rect);
 
+    if (ctx->need_to_try_overlay &&
+        (win->gsc_mode == GSC_OUTPUT_MODE) &&
+        (win->is_gsc_started || (ctx->overaly_delay_frames > 0)))
+        return 1;  /* Force all the layers to FB type */
+
     if ((rect.x != win->rect_info.x) || (rect.y != win->rect_info.y) ||
         (rect.w != win->rect_info.w) || (rect.h != win->rect_info.h)) {
+
         if (prev_handle->usage & GRALLOC_USAGE_CAMERA) {
             if ((ctx->layer_prev_buf[win_idx] != (uint32_t)cur->handle) &&
                 (win->gsc_mode == GSC_OUTPUT_MODE) && ctx->dis_rect_changed) {
@@ -696,6 +702,13 @@ static int assign_overlay_window(struct hwc_context_t *ctx, hwc_layer_t *cur,
             ctx->need_to_try_overlay = 1;
             return 1;
         }
+
+        if ((win->gsc_mode == GSC_OUTPUT_MODE) &&
+            (win->ovly_lay_type == HWC_YUV_OVLY) &&
+            (win->is_gsc_started || (ctx->overaly_delay_frames > 0))) {
+            ctx->need_to_try_overlay = 1;
+            return 1;
+        }
         ctx->need_to_try_overlay = 0;
         win->src_rect_info.x = cur->sourceCrop.left;
         win->src_rect_info.y = cur->sourceCrop.top;
@@ -712,13 +725,6 @@ static int assign_overlay_window(struct hwc_context_t *ctx, hwc_layer_t *cur,
 
         win->need_win_config = 1;
         win->need_gsc_config = 1;
-        if (win->is_gsc_started) {
-            win->is_gsc_started = 0;
-            ret = exynos_gsc_stop_exclusive(ctx->gsc_handle);
-            if (ret < 0) {
-                SEC_HWC_Log(HWC_LOG_ERROR, "%s:: error : exynos_gsc_out_stop", __func__);
-            }
-        }
 
         if(!(prev_handle->usage & GRALLOC_USAGE_CAMERA))
             ctx->layer_prev_buf[win_idx] = 0;
@@ -730,20 +736,19 @@ static int assign_overlay_window(struct hwc_context_t *ctx, hwc_layer_t *cur,
             cur->sourceCrop.left, cur->sourceCrop.top,
             cur->sourceCrop.right - cur->sourceCrop.left, cur->sourceCrop.bottom - cur->sourceCrop.top);
 
+        if ((win->gsc_mode == GSC_OUTPUT_MODE) &&
+            (win->ovly_lay_type == HWC_YUV_OVLY) &&
+            (win->is_gsc_started || (ctx->overaly_delay_frames > 0))) {
+            ctx->need_to_try_overlay = 1;
+            return 1;
+        }
+        ctx->need_to_try_overlay = 0;
+
         win->src_rect_info.x = cur->sourceCrop.left;
         win->src_rect_info.y = cur->sourceCrop.top;
         win->src_rect_info.w = cur->sourceCrop.right - cur->sourceCrop.left;
         win->src_rect_info.h = cur->sourceCrop.bottom - cur->sourceCrop.top;
-        if (win->ovly_lay_type == HWC_YUV_OVLY) {
-            win->need_gsc_config = 1;
-            if (win->is_gsc_started) {
-                win->is_gsc_started = 0;
-                ret = exynos_gsc_stop_exclusive(ctx->gsc_handle);
-                if (ret < 0) {
-                    SEC_HWC_Log(HWC_LOG_ERROR, "%s:: error : exynos_gsc_out_stop", __func__);
-                }
-            }
-        }
+
     }
 
     win->layer_index = layer_idx;
@@ -819,14 +824,6 @@ static int gsc_mode_change_check( struct hwc_context_t* ctx,  hwc_layer_list_t* 
 
     max_down_scale_ratio = SEC_MAX(ctx->gsc_out_max_down_scale_ratio, 1);
     max_down_scale_ratio = SEC_MIN(max_down_scale_ratio, 4);
-
-#if defined(SUPPORT_RGB_OVERLAY)
-    if (ctx->is_rgb_ovly_ok && (ctx->num_of_yuv_layers == 0)) {
-        mode_change = GSC_M2M_MODE;
-        num_yuv_layers = 1;
-        goto GSC_MODE_CHANGE;
-    }
-#endif
 
     for (int i = 0; i < (int) list->numHwLayers; i++) {
         hwc_layer_t* cur = &list->hwLayers[i];
@@ -1246,19 +1243,6 @@ static int hwc_set(hwc_composer_device_t *dev,
     for (int i = 0; i < NUM_OF_WIN; i++)
         skip_lay_rendering[i] = 0;
 
-    if ((ctx->num_of_hwc_layer <= 0) && (ctx->gsc_mode == GSC_OUTPUT_MODE)) {
-        for (int i = 0; i < 1; i++) {  /* to do : for multiple windows */
-            if (ctx->win[i].is_gsc_started) {
-                ctx->win[i].is_gsc_started = 0;
-                ret = exynos_gsc_stop_exclusive(ctx->gsc_handle);
-                if (ret < 0) {
-                    SEC_HWC_Log(HWC_LOG_ERROR, "%s:: error : exynos_gsc_out_stop", __func__);
-                }
-                ctx->win[i].power_state = 0;
-            }
-        }
-    }
-
     //compose hardware layers here
     for (int i = 0; i < ctx->num_of_hwc_layer; i++) {
         win = &ctx->win[i];
@@ -1500,6 +1484,21 @@ static int hwc_set(hwc_composer_device_t *dev,
     if (ctx->num_of_hwc_layer <= 0)
         window_show(&ctx->ui_win);
 #endif
+
+    ctx->overaly_delay_frames = SEC_MAX(ctx->overaly_delay_frames-1, 0);
+    if ((ctx->num_of_hwc_layer <= 0) && (ctx->gsc_mode == GSC_OUTPUT_MODE)) {
+        for (int i = 0; i < 1; i++) {  /* to do : for multiple windows */
+            if (ctx->win[i].is_gsc_started) {
+                ctx->win[i].is_gsc_started = 0;
+                ctx->overaly_delay_frames = NUM_OVLY_DELAY_FRAMES;
+                ret = exynos_gsc_stop_exclusive(ctx->gsc_handle);
+                if (ret < 0) {
+                    SEC_HWC_Log(HWC_LOG_ERROR, "%s:: error : exynos_gsc_out_stop", __func__);
+                }
+                ctx->win[i].power_state = 0;
+            }
+        }
+    }
 
     for (int i = ctx->num_of_hwc_layer; i < NUM_OF_WIN; i++) {
         window_hide(&ctx->win[i]);
