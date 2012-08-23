@@ -692,6 +692,11 @@ static int assign_overlay_window(struct hwc_context_t *ctx, hwc_layer_t *cur,
             }
         }
 
+        if (win->power_state) {
+            ctx->need_to_try_overlay = 1;
+            return 1;
+        }
+        ctx->need_to_try_overlay = 0;
         win->src_rect_info.x = cur->sourceCrop.left;
         win->src_rect_info.y = cur->sourceCrop.top;
         win->src_rect_info.w = cur->sourceCrop.right - cur->sourceCrop.left;
@@ -704,13 +709,8 @@ static int assign_overlay_window(struct hwc_context_t *ctx, hwc_layer_t *cur,
         win->rect_info.y = rect.y;
         win->rect_info.w = rect.w;
         win->rect_info.h = rect.h;
-        //turnoff the window and set the window position with new conf...
-        if (window_set_pos(win) < 0) {
-            SEC_HWC_Log(HWC_LOG_ERROR, "%s::window_set_pos is failed : %s",
-                    __func__, strerror(errno));
-            ret = -1;
-        }
 
+        win->need_win_config = 1;
         win->need_gsc_config = 1;
         if (win->is_gsc_started) {
             win->is_gsc_started = 0;
@@ -961,6 +961,7 @@ static int hwc_prepare(hwc_composer_device_t *dev, hwc_layer_list_t* list)
 #if defined(BOARD_USES_HDMI) && defined(SUPPORT_RGB_OVERLAY)
     (ctx->mHdmiCableStatus == ctx->mHdmiClient->getHdmiCableStatus()) &&
 #endif
+    (!ctx->need_to_try_overlay) &&
     (ctx->num_of_hwc_layer > 0)) {
         get_hwc_ui_lay_skipdraw_decision(ctx, list);
         return 0;
@@ -983,6 +984,7 @@ static int hwc_prepare(hwc_composer_device_t *dev, hwc_layer_list_t* list)
 #if defined(BOARD_USES_HDMI) && defined(SUPPORT_RGB_OVERLAY)
     (ctx->mHdmiCableStatus == ctx->mHdmiClient->getHdmiCableStatus()) &&
 #endif
+     (!ctx->need_to_try_overlay) &&
     (!ctx->dis_rect_changed)))
         return 0;
 
@@ -1327,16 +1329,11 @@ static int hwc_set(hwc_composer_device_t *dev,
                 if (i > 0) { //dual video scenario
                     if ((ctx->win[i - 1].gsc_mode == GSC_M2M_MODE) &&
                         ctx->win[i - 1].is_gsc_started) {
+                        ctx->win[i - 1].is_gsc_started = 0;
                         if (exynos_gsc_wait_done(ctx->gsc_handle) < 0) {
                             SEC_HWC_Log(HWC_LOG_ERROR,
                                 "%s:: First-video: error : exynos_gsc_wait_done", __func__);
                         }
-                        ctx->win[i - 1].is_gsc_started = 0;
-                        window_pan_display(&ctx->win[i - 1]);
-                        ctx->win[i - 1].buf_index =
-                                (ctx->win[i - 1].buf_index + 1) % NUM_OF_WIN_BUF;
-                        if (ctx->win[i - 1].power_state == 0)
-                            window_show(&ctx->win[i - 1]);
                     }
                 }
                 src_dst_img_info_gsc_out(&src_img, &src_work_rect,
@@ -1426,10 +1423,40 @@ static int hwc_set(hwc_composer_device_t *dev,
         win = &ctx->win[i];
         if ((win->status == HWC_WIN_RESERVED) &&
             (skip_lay_rendering[i] == 0) && (win->ovly_lay_type == HWC_RGB_OVLY)) {
-                    window_pan_display(win);
-                    win->buf_index = (win->buf_index + 1) % NUM_OF_WIN_BUF;
-                    if (win->power_state == 0)
-                        window_show(win);
+            if (win->need_win_config) {
+                window_set_pos(win);
+                win->need_win_config = 0;
+            }
+            window_pan_display(win);
+            win->buf_index = (win->buf_index + 1) % NUM_OF_WIN_BUF;
+            if (win->power_state == 0)
+                window_show(win);
+        }
+    }
+
+    if (ctx->num_of_hwc_layer > 0 ) {
+        for (int i = 0; i < ctx->num_of_hwc_layer; i++) {
+            if (ctx->win[i].ovly_lay_type == HWC_YUV_OVLY) {
+                if (skip_lay_rendering[i] == 0) {
+                    if (ctx->win[i].is_gsc_started) {
+                        if (exynos_gsc_wait_done(ctx->gsc_handle) < 0) {
+                            SEC_HWC_Log(HWC_LOG_ERROR, "%s:: error : exynos_gsc_wait_done", __func__);
+                        }
+                    }
+                    if (ctx->win[i].gsc_mode == GSC_M2M_MODE) {
+                        ctx->win[i].is_gsc_started = 0;
+                        if (ctx->win[i].need_win_config) {
+                            window_set_pos(&ctx->win[i]);
+                            ctx->win[i].need_win_config = 0;
+                        }
+                        window_pan_display(&ctx->win[i]);
+                        ctx->win[i].buf_index =
+                                (ctx->win[i].buf_index + 1) % NUM_OF_WIN_BUF;
+                        if (ctx->win[i].power_state == 0)
+                           window_show(&ctx->win[i]);
+                    }
+                }
+            }
         }
     }
 
@@ -1463,26 +1490,6 @@ static int hwc_set(hwc_composer_device_t *dev,
         window_hide(&ctx->ui_win);
     }
 #endif
-
-    if (ctx->num_of_hwc_layer > 0 ) {
-        for (int i = 0; i < ctx->num_of_hwc_layer; i++) {
-            if (ctx->win[i].ovly_lay_type == HWC_YUV_OVLY) {
-                if ((ctx->win[i].is_gsc_started) && (skip_lay_rendering[i] == 0)) {
-                    if (exynos_gsc_wait_done(ctx->gsc_handle) < 0) {
-                        SEC_HWC_Log(HWC_LOG_ERROR, "%s:: error : exynos_gsc_wait_done", __func__);
-                    }
-                    if (ctx->win[i].gsc_mode == GSC_M2M_MODE) {
-                        ctx->win[i].is_gsc_started = 0;
-                        window_pan_display(&ctx->win[i]);
-                        ctx->win[i].buf_index =
-                                (ctx->win[i].buf_index + 1) % NUM_OF_WIN_BUF;
-                        if (ctx->win[i].power_state == 0)
-                            window_show(&ctx->win[i]);
-                    }
-                }
-            }
-        }
-    }
 
 #if defined(TURN_OFF_UI_WINDOW)
     if (ctx->num_of_hwc_layer <= 0)

@@ -158,6 +158,7 @@ struct hwc_win_info_t {
     struct fb_var_screeninfo var_info;
     struct fb_var_screeninfo lcd_info;
     int         gsc_mode;
+    int         need_win_config;
     int         need_gsc_config;
     int         is_gsc_started;
 };
@@ -224,6 +225,7 @@ struct hwc_context_t {
     hwc_procs_t               *procs;
     pthread_t                 vsync_thread;
 #endif
+    int     need_to_try_overlay;
 };
 
 typedef enum _LOG_LEVEL {
