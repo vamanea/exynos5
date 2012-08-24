@@ -55,6 +55,10 @@
 #define DEV_NAME    "/dev/i2c-8"
 #endif
 
+#ifdef DDC_CH_I2C_0
+#define DEV_NAME    "/dev/i2c-0"
+#endif
+
 /**
  * DDC file descriptor
  */

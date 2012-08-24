@@ -73,6 +73,10 @@ ifeq ($(BOARD_HDMI_STD),STD_1080P)
 	LOCAL_CFLAGS  += -DSTD_1080P
 endif
 
+ifeq ($(BOARD_PERSISTENT_UI),true)
+	LOCAL_CFLAGS  += -DPERSISTENT_UI
+endif
+
 LOCAL_MODULE := libhdmi
 include $(BUILD_SHARED_LIBRARY)
 
