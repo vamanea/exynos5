@@ -1088,8 +1088,11 @@ static int hwc_prepare(hwc_composer_device_t *dev, hwc_layer_list_t* list)
         (ctx->num_of_ext_disp_video_layer == 0 && ctx->num_of_ext_disp_layer >= 2) ||
         (ctx->num_of_ext_disp_video_layer > 1) ||
         (ctx->hdmi_layer_buf_index[android::ExynosHdmiClient::HDMI_LAYER_GRAPHIC_0] != NOT_DEFINED)) {
-    } else
+    }
+#ifndef PERSISTENT_UI
+    else
         ctx->mHdmiClient->setHdmiLayerDisable(android::ExynosHdmiClient::HDMI_LAYER_GRAPHIC_0);
+#endif
 
     if (ctx->hdmi_layer_buf_index[android::ExynosHdmiClient::HDMI_LAYER_VIDEO] == NOT_DEFINED)
         ctx->mHdmiClient->setHdmiLayerDisable(android::ExynosHdmiClient::HDMI_LAYER_VIDEO);
