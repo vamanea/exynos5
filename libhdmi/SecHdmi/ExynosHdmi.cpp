@@ -753,7 +753,7 @@ bool SecHdmi::m_Doflush(int srcW, int srcH, int srcColorFormat,
         mDstHeight[hdmiLayer] = mHdmiDstHeight;
     } else {
         if (hdmiMode == HDMI_MODE_MIRROR) {
-            if (mHdmiPath == HDMI_PATH_OVERLAY) {
+            if (mHdmiPath == HDMI_PATH_OVERLAY && flag_full_display) {
 #if defined(BOARD_USES_HDMI_FIMGAPI)
                 scaled_dstRect.left = 0;
                 scaled_dstRect.top = 0;
