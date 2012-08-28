@@ -402,7 +402,7 @@ static ExynosVideoErrorType MFC_Encoder_Set_EncParam (
 
         /* doesn't have to be set */
         ext_ctrl[31].id = V4L2_CID_MPEG_VIDEO_GOP_CLOSURE;
-        ext_ctrl[31].value = 0;
+        ext_ctrl[31].value = 1;
         ext_ctrl[32].id = V4L2_CID_MPEG_VIDEO_H264_I_PERIOD;
         ext_ctrl[32].value = 10;
         ext_ctrl[33].id = V4L2_CID_MPEG_VIDEO_VBV_SIZE;
