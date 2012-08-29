@@ -1232,11 +1232,13 @@ static int hwc_set(hwc_composer_device_t *dev,
         if (ctx->num_of_fb_lay_skip == 0)
 #endif
         {
+#ifndef  TURN_OFF_UI_WINDOW
             glDisable(GL_SCISSOR_TEST);
             glClearColor(0, 0, 0, 0);
             glClear(GL_COLOR_BUFFER_BIT);
             glEnable(GL_SCISSOR_TEST);
             need_swap_buffers = true;
+#endif
         }
     }
     ctx->num_of_fb_layer_prev = ctx->num_of_fb_layer;
@@ -1465,19 +1467,22 @@ static int hwc_set(hwc_composer_device_t *dev,
             return HWC_EGL_ERROR;
         }
 #ifdef CHECK_EGL_FPS
-            check_fps();
+        check_fps();
 #endif
 #ifdef HWC_HWOVERLAY
-            glFinish();
+        glFinish();
 #endif
-            EGLBoolean sucess = eglSwapBuffers((EGLDisplay)dpy, (EGLSurface)sur);
-            if (!sucess)
-                return HWC_EGL_ERROR;
+#ifdef  HWC_GL_READ_PIXEL
+        unsigned char pixels[4];
+        glReadPixels(0, 0, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+#endif
+        EGLBoolean sucess = eglSwapBuffers((EGLDisplay)dpy, (EGLSurface)sur);
+        if (!sucess)
+            return HWC_EGL_ERROR;
 
 #if defined(TURN_OFF_UI_WINDOW)
         window_show(&ctx->ui_win);
 #endif
-
     }
 #if defined(TURN_OFF_UI_WINDOW)
 #ifdef SKIP_DUMMY_UI_LAY_DRAWING
