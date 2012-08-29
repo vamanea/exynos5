@@ -400,6 +400,9 @@ namespace android {
     {
         Mutex::Autolock _l(mLock);
 
+        if (hdmiCableInserted() == false)
+            return;
+
         if (enable == 0) {
             if (mExynosHdmi.clearHdmiWriteBack() == false)
                 ALOGE("%s::mExynosHdmi.clearHdmiWriteBack() fail", __func__);
@@ -524,11 +527,21 @@ namespace android {
 
     void ExynosTVOutService::setHdmiLayerEnable(uint32_t hdmiLayer)
     {
+        Mutex::Autolock _l(mLock);
+
+        if (hdmiCableInserted() == false)
+            return;
+
         mExynosHdmi.setHdmiLayerEnable(hdmiLayer);
     }
 
     void ExynosTVOutService::setHdmiLayerDisable(uint32_t hdmiLayer)
     {
+        Mutex::Autolock _l(mLock);
+
+        if (hdmiCableInserted() == false)
+            return;
+
         mExynosHdmi.setHdmiLayerDisable(hdmiLayer);
     }
 
