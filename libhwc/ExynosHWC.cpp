@@ -1178,6 +1178,7 @@ static int hwc_set(hwc_composer_device_t *dev,
     exynos_gsc_img src_info;
     exynos_gsc_img dst_info;
     bool need_swap_buffers = ctx->num_of_fb_layer > 0;
+    bool need_wait_render_finish = 0;
 
     if (sur == NULL || dpy == NULL) {
 #ifdef SKIP_DUMMY_UI_LAY_DRAWING
@@ -1238,6 +1239,7 @@ static int hwc_set(hwc_composer_device_t *dev,
 #endif
         }
     }
+    need_wait_render_finish = ((!ctx->num_of_fb_layer_prev) && (ctx->num_of_fb_layer)) ||ctx->need_to_try_overlay;
     ctx->num_of_fb_layer_prev = ctx->num_of_fb_layer;
 
     for (int i = 0; i < NUM_OF_WIN; i++)
@@ -1405,6 +1407,21 @@ static int hwc_set(hwc_composer_device_t *dev,
 #endif
     }
 
+    if (need_swap_buffers) {
+         if (sur == NULL || dpy == NULL){
+            return HWC_EGL_ERROR;
+        }
+#ifdef HWC_HWOVERLAY
+        glFinish();
+#endif
+#ifdef  HWC_GL_READ_PIXEL
+        if (need_wait_render_finish) {
+            unsigned char pixels[4];
+            glReadPixels(0, 0, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+        }
+#endif
+    }
+
     for (int i = 0; i < ctx->num_of_hwc_layer; i++) {
         win = &ctx->win[i];
         if ((win->status == HWC_WIN_RESERVED) &&
@@ -1452,13 +1469,6 @@ static int hwc_set(hwc_composer_device_t *dev,
         }
 #ifdef CHECK_EGL_FPS
         check_fps();
-#endif
-#ifdef HWC_HWOVERLAY
-        glFinish();
-#endif
-#ifdef  HWC_GL_READ_PIXEL
-        unsigned char pixels[4];
-        glReadPixels(0, 0, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 #endif
         EGLBoolean sucess = eglSwapBuffers((EGLDisplay)dpy, (EGLSurface)sur);
         if (!sucess)
