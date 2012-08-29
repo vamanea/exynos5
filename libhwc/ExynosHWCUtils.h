@@ -57,7 +57,6 @@
 #endif
 
 #define GSC_OUT_DEV_ID 0
-#define GSC_DEFAULT_MODE    (GSC_OUTPUT_MODE)   /* GSC_M2M_MODE */
 #undef  USE_GSC_M2M_FOR_DRM
 
 #if defined(BOARD_USES_HWC_FIMGAPI)
