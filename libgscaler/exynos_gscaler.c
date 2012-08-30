@@ -1481,6 +1481,21 @@ int exynos_gsc_m2m_config(void *handle,
     return 0;
 }
 
+int exynos_gsc_set_out_mode(void *handle, int out_mode)
+{
+    struct GSC_HANDLE *gsc_handle;
+    gsc_handle = (struct GSC_HANDLE *)handle;
+
+    if (out_mode <= GSC_OUT_DUMMY || out_mode >= GSC_OUT_RESERVED) {
+        ALOGE("Error: out_mode unmathced !!!!");
+        return -1;
+    }
+
+    gsc_handle->out_mode = out_mode;
+
+    return 0;
+}
+
 int exynos_gsc_out_config(void *handle,
     exynos_gsc_img *src_img,
     exynos_gsc_img *dst_img)
@@ -1661,7 +1676,7 @@ int exynos_gsc_out_config(void *handle,
         sd_fmt.format.width  = gsc_handle->dst_img.fw;
         sd_fmt.format.height = gsc_handle->dst_img.fh;
 
-        if (gsc_handle->out_mode == GSC_OUT_TV_DIGITAL)
+        if (gsc_handle->out_mode == GSC_OUT_TV_HDMI_YCBCR)
             sd_fmt.format.code   = V4L2_MBUS_FMT_YUV8_1X24;
         else
             sd_fmt.format.code   = V4L2_MBUS_FMT_XRGB8888_4X8_LE;

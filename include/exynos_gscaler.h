@@ -289,6 +289,9 @@ int exynos_gsc_set_dst_addr(
 int exynos_gsc_convert(
     void *handle);
 
+int exynos_gsc_set_out_mode(
+    void *handle,
+    int out_mode);
 
 /*
 *api for setting the GSC config.
@@ -347,7 +350,7 @@ enum {
 enum {
     GSC_OUT_DUMMY = 0,
     GSC_OUT_FIMD,
-    GSC_OUT_TV_DIGITAL,
+    GSC_OUT_TV_HDMI_YCBCR,
     GSC_OUT_TV_HDMI_RGB,
     GSC_OUT_TV_DVI,
     GSC_OUT_RESERVED,
