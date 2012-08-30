@@ -78,7 +78,7 @@ LOCAL_CFLAGS  += -DSTD_1080P
 endif
 endif
 
-ifeq ($(BOARD_PERSISTENT_UI),true)
+ifeq ($(BOARD_USES_PERSISTENT_UI),true)
 LOCAL_CFLAGS  += -DPERSISTENT_UI
 endif
 
