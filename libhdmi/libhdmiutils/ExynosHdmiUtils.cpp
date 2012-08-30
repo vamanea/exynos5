@@ -88,7 +88,8 @@ int m_mxr_get_plane_size(
 
 void *exynos_mxr_create(
     int dev_num,
-    unsigned int layer_id)
+    unsigned int layer_id,
+    int out_mode)
 {
     HDMI_Log(HDMI_LOG_DEBUG, "%s", __func__);
 
@@ -120,7 +121,7 @@ void *exynos_mxr_create(
     mxr_handle->buf_idx   = 0;
     mxr_handle->qbuf_cnt  = 0;
     mxr_handle->op_mutex  = NULL;
-    mxr_handle->out_mode  = V4L2_OUTPUT_TYPE_HDMI_RGB;
+    mxr_handle->out_mode  = out_mode;
 
     srand(time(NULL));
     op_id = rand() % 1000000; // just make random id
@@ -337,13 +338,13 @@ int exynos_mxr_config(
     mxr_handle->out_mode = out_mode;
 
     switch (mxr_handle->out_mode) {
-    case V4L2_OUTPUT_TYPE_DIGITAL:
+    case HDMI_OUTPUT_MODE_YCBCR:
         dst_color_space = V4L2_MBUS_FMT_YUV8_1X24;
         break;
-    case V4L2_OUTPUT_TYPE_HDMI_RGB:
+    case HDMI_OUTPUT_MODE_RGB:
         dst_color_space = V4L2_MBUS_FMT_XRGB8888_4X8_LE;
         break;
-    case V4L2_OUTPUT_TYPE_DVI:
+    case HDMI_OUTPUT_MODE_DVI:
         dst_color_space = V4L2_MBUS_FMT_XRGB8888_4X8_LE;
         break;
     default:
@@ -443,7 +444,7 @@ int exynos_mxr_config(
     sd_fmt.which = V4L2_SUBDEV_FORMAT_ACTIVE;
     sd_fmt.format.width  = mxr_handle->dst_img.fw;
     sd_fmt.format.height = mxr_handle->dst_img.fh;
-    sd_fmt.format.code   = V4L2_MBUS_FMT_XRGB8888_4X8_LE; // FIX ME : get from common_output_type // carrotsm
+    sd_fmt.format.code   = dst_color_space;
 
     if (exynos_subdev_s_fmt(mxr_handle->mxr_sd_entity->fd, &sd_fmt) < 0) {
         ALOGE("%s::Mixer subdev set format failed (PAD=%d)", __func__, sd_fmt.pad);
@@ -1221,6 +1222,29 @@ int hdmi_v4l2_output_type_2_outputmode(int v4l2_output_type)
     }
 
     return outputMode;
+}
+
+int hdmi_outputmode_2_gsc_outputmode(int output_mode)
+{
+    int gsc_output_mode = -1;
+
+    switch (output_mode) {
+    case HDMI_OUTPUT_MODE_YCBCR:
+        gsc_output_mode = GSC_OUT_TV_HDMI_YCBCR;
+        break;
+    case HDMI_OUTPUT_MODE_RGB:
+        gsc_output_mode = GSC_OUT_TV_HDMI_RGB;
+        break;
+    case HDMI_OUTPUT_MODE_DVI:
+        gsc_output_mode = GSC_OUT_TV_DVI;
+        break;
+    default:
+        HDMI_Log(HDMI_LOG_ERROR, "%s::unmathced HDMI_mode(%d)", __func__, output_mode);
+        gsc_output_mode = -1;
+        break;
+    }
+
+    return gsc_output_mode;
 }
 
 int hdmi_check_output_mode(int v4l2_output_type)

@@ -388,13 +388,13 @@ bool ExynosHdmi::create(int width, int height)
         goto CREATE_FAIL;
     }
 
-    m_mxr_handle_grp0 = exynos_mxr_create(0, 0);
+    m_mxr_handle_grp0 = exynos_mxr_create(0, 0, mHdmiOutputMode);
     if (m_mxr_handle_grp0 == NULL) {
         HDMI_Log(HDMI_LOG_ERROR, "%s::create mixer graphic layer 0 failed", __func__);
         return false;
     }
 
-    m_mxr_handle_grp1 = exynos_mxr_create(0, 1);
+    m_mxr_handle_grp1 = exynos_mxr_create(0, 1, mHdmiOutputMode);
     if (m_mxr_handle_grp1 == NULL) {
         HDMI_Log(HDMI_LOG_ERROR, "%s::create mixer graphic layer 1 failed", __func__);
         return false;
@@ -1301,7 +1301,7 @@ bool ExynosHdmi::m_changeHdmiPath(void)
     }
 
     if (mHdmiPath == HDMI_PATH_OVERLAY) {
-        int gsc_out_tv_mode = mHdmiOutputMode + 2;
+        int gsc_out_tv_mode = hdmi_outputmode_2_gsc_outputmode(mHdmiOutputMode);
         m_gsc_out_handle = exynos_gsc_create_exclusive(
                                             DEFAULT_GSC_OUT_INDEX,
                                             GSC_OUTPUT_MODE,
@@ -1528,6 +1528,12 @@ bool ExynosHdmi::m_reset(int w, int h, int dstX, int dstY, int colorFormat, int 
                     src_info.fw, src_info.fh, src_info.w, src_info.h,
                     dst_info.fw, dst_info.fh, dst_info.w, dst_info.h, dst_info.x, dst_info.y);
 
+
+            if (exynos_gsc_set_out_mode(m_gsc_out_handle, hdmi_outputmode_2_gsc_outputmode(mHdmiOutputMode)) < 0) {
+                HDMI_Log(HDMI_LOG_ERROR, "%s:: error : exynos_gsc_set_out_mode", __func__);
+                return false;
+            }
+
             if (exynos_gsc_config_exclusive(m_gsc_out_handle, &src_info, &dst_info) < 0) {
                 HDMI_Log(HDMI_LOG_ERROR, "%s:: error : exynos_gsc_config_exclusive", __func__);
                 return false;
@@ -1707,7 +1713,7 @@ bool ExynosHdmi::m_reset(int w, int h, int dstX, int dstY, int colorFormat, int 
             else
                 m_mxr_handle_grp = m_mxr_handle_grp1;
 
-            if (exynos_mxr_config(m_mxr_handle_grp, &src_img, &dst_img, V4L2_OUTPUT_TYPE_HDMI_RGB) < 0) {
+            if (exynos_mxr_config(m_mxr_handle_grp, &src_img, &dst_img, mHdmiOutputMode) < 0) {
                 HDMI_Log(HDMI_LOG_ERROR, "%s:: error : exynos_mxr_config", __func__);
                 return false;
             }

@@ -101,7 +101,8 @@ struct MXR_HANDLE {
 
 void *exynos_mxr_create(
     int dev_num,
-    unsigned int layer_id);
+    unsigned int layer_id,
+    int out_mode);
 
 void exynos_mxr_destroy(
     void *handle);
@@ -161,6 +162,7 @@ int hdmi_Blit_byG2D(
 
 int hdmi_outputmode_2_v4l2_output_type(int output_mode);
 int hdmi_v4l2_output_type_2_outputmode(int v4l2_output_type);
+int hdmi_outputmode_2_gsc_outputmode(int output_mode);
 
 int hdmi_check_output_mode(int v4l2_output_type);
 int hdmi_check_resolution(unsigned int dv_id);
