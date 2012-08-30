@@ -188,6 +188,10 @@ private :
     void        *m_mxr_handle_grp1;
     struct v4l2_rect mDstRect;
 
+#if defined(SCALABLE_FB)
+    unsigned int mPreviousResolution;
+#endif //SCALABLE_FB
+
 public :
 
     ExynosHdmi();
@@ -216,6 +220,7 @@ public :
     bool        setHdmiDrmMode(int drmMode);
     bool        setHdmiOutputMode(int hdmiOutputMode, bool forceRun = false);
     bool        setHdmiResolution(unsigned int hdmiResolutionValue, unsigned int s3dMode, bool forceRun = false);
+    void        getHdmiResolution(uint32_t *width, uint32_t *height);
     bool        setHdcpMode(bool hdcpMode, bool forceRun = false);
     bool        setUIRotation(unsigned int rotVal, unsigned int hwcLayer);
     bool        setDisplaySize(int width, int height);

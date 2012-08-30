@@ -46,9 +46,17 @@ ExynosHdmiClient * ExynosHdmiClient::getInstance(void)
     return &singleton;
 }
 
+void ExynosHdmiClient::resetTVOutService()
+{
+    g_ExynosTVOutService = 0;
+}
+
 void ExynosHdmiClient::setHdmiCableStatus(int status)
 {
     ALOGD("%s HDMI status: %d\n", __func__, status);
+
+    if (g_ExynosTVOutService == 0)
+        g_ExynosTVOutService = m_getExynosTVOutService();
 
     if (g_ExynosTVOutService != 0)
         g_ExynosTVOutService->setHdmiCableStatus(status);
@@ -82,6 +90,12 @@ void ExynosHdmiClient::setHdmiResolution(int resolution, HDMI_S3D_MODE s3dMode)
 
     if (g_ExynosTVOutService != 0)
         g_ExynosTVOutService->setHdmiResolution(resolution, s3dMode);
+}
+
+void ExynosHdmiClient::getHdmiResolution(uint32_t *width, uint32_t *height)
+{
+    if (g_ExynosTVOutService != 0)
+        g_ExynosTVOutService->getHdmiResolution(width, height);
 }
 
 void ExynosHdmiClient::setHdmiHdcp(int enHdcp)

@@ -55,6 +55,7 @@ namespace android {
             virtual void setHdmiLayerDisable(uint32_t hdmiLayer) = 0;
 
             virtual uint32_t getHdmiCableStatus() = 0;
+            virtual void getHdmiResolution(uint32_t *width, uint32_t *height) = 0;
     };
     //--------------------------------------------------------------
     class BpExynosTVOut: public BpInterface<IExynosTVOut>
@@ -83,6 +84,7 @@ namespace android {
             virtual void setHdmiLayerDisable(uint32_t hdmiLayer);
 
             virtual uint32_t getHdmiCableStatus();
+            virtual void getHdmiResolution(uint32_t *width, uint32_t *height);
     };
 };
 #endif

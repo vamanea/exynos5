@@ -47,6 +47,7 @@ namespace android {
         GET_HDMI_STATUS,
         SET_HDMI_MODE,
         SET_HDMI_RESOLUTION,
+        GET_HDMI_RESOLUTION,
         SET_HDMI_HDCP,
         SET_HDMI_ROTATE,
         SET_HDMI_HWCLAYER,
@@ -231,6 +232,15 @@ namespace android {
             setHdmiResolution(resolution, (HDMI_S3D_MODE)s3dMode);
         } break;
 
+        case GET_HDMI_RESOLUTION: {
+            uint32_t width, height;
+            width = 0;
+            height = 0;
+            getHdmiResolution(&width, &height);
+            reply->writeInt32(width);
+            reply->writeInt32(height);
+        } break;
+
         case SET_HDMI_HDCP: {
             int enHdcp = data.readInt32();
             setHdmiHdcp(enHdcp);
@@ -363,6 +373,14 @@ namespace android {
             ALOGE("%s::mExynosHdmi.setHdmiResolution() fail", __func__);
             return;
         }
+    }
+
+    void ExynosTVOutService::getHdmiResolution(uint32_t *width, uint32_t *height)
+    {
+        Mutex::Autolock _l(mLock);
+
+        if (hdmiCableInserted() == true)
+            mExynosHdmi.getHdmiResolution(width, height);
     }
 
     void ExynosTVOutService::setHdmiHdcp(uint32_t hdcp_en)

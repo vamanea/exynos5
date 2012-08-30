@@ -110,6 +110,8 @@ public:
         void setHdmiLayerDisable(uint32_t hdmiLayer);
 
         uint32_t getHdmiCableStatus();
+        void getHdmiResolution(uint32_t *width, uint32_t *height);
+        void resetTVOutService();
 private:
         sp<IExynosTVOut> m_getExynosTVOutService(void);
 

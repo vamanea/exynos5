@@ -35,6 +35,7 @@ namespace android {
         GET_HDMI_STATUS,
         SET_HDMI_MODE,
         SET_HDMI_RESOLUTION,
+        GET_HDMI_RESOLUTION,
         SET_HDMI_HDCP,
         SET_HDMI_ROTATE,
         SET_HDMI_HWCLAYER,
@@ -73,6 +74,14 @@ namespace android {
         data.writeInt32(resolution);
         data.writeInt32(s3dMode);
         remote()->transact(SET_HDMI_RESOLUTION, data, &reply);
+    }
+
+    void BpExynosTVOut::getHdmiResolution(uint32_t *width, uint32_t *height)
+    {
+        Parcel data, reply;
+        remote()->transact(GET_HDMI_RESOLUTION, data, &reply);
+        *width = reply.readInt32();
+        *height = reply.readInt32();
     }
 
     void BpExynosTVOut::setHdmiHdcp(uint32_t resolution)

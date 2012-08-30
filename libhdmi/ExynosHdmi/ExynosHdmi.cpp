@@ -249,6 +249,9 @@ ExynosHdmi::ExynosHdmi():
     m_gsc_out_handle(NULL),
     m_mxr_handle_grp0(NULL),
     m_mxr_handle_grp1(NULL),
+#if defined(SCALABLE_FB)
+    mPreviousResolution(-1),
+#endif //SCALABLE_FB
     mIonClient(NULL)
 {
     HDMI_Log(HDMI_LOG_DEBUG, "%s", __func__);
@@ -529,6 +532,10 @@ bool ExynosHdmi::connect(void)
 
         if (m_flagHWConnected() == false) {
             ALOGD("%s::m_flagHWConnected() fail", __func__);
+#if defined(SCALABLE_FB)
+            if (mPreviousResolution == -1)
+                mPreviousResolution = mHdmiResolutionValue;
+#endif //SCALABLE_FB
             return false;
         }
 
@@ -570,6 +577,13 @@ bool ExynosHdmi::connect(void)
 #if defined(BOARD_USES_EDID)
     display_menu();
 #endif
+
+#if defined(SCALABLE_FB)
+    if (mPreviousResolution != -1 && mPreviousResolution != mHdmiResolutionValue)
+        kill(getpid(), SIGKILL);
+    else
+        mPreviousResolution = mHdmiResolutionValue;
+#endif //SCALABLE_FB
 
     return true;
 }
@@ -1194,6 +1208,12 @@ bool ExynosHdmi::setHdmiResolution(unsigned int hdmiResolutionValue, unsigned in
     }
 
     return true;
+}
+
+void ExynosHdmi::getHdmiResolution(uint32_t *width, uint32_t *height)
+{
+    *width = mHdmiDstWidth;
+    *height = mHdmiDstHeight;
 }
 
 bool ExynosHdmi::setHdcpMode(bool hdcpMode, bool forceRun)

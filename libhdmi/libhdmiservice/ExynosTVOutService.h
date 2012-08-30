@@ -125,6 +125,8 @@ namespace android {
             bool                                hdmiCableInserted(void);
             void                                setLCDsize(void);
 
+            virtual void                        getHdmiResolution(uint32_t *width, uint32_t *height);
+
         private:
             sp<ExynosHdmiEventMsg>      mMsgForVideo;
             sp<ExynosHdmiEventMsg>      mMsgForUI;
