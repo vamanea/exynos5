@@ -55,6 +55,7 @@ public:
         ERROR_BUF_NOT_SET_YET,
         ERROR_REQBUF_FAIL,
         ERROR_INVALID_V4l2_BUF_TYPE = -0x80,
+        ERROR_INVALID_SELECT,
         ERROR_MMAP_FAILED,
         ERROR_FAIL,
         ERROR_NONE = 0
@@ -108,6 +109,8 @@ public:
     int setSize(int iW, int iH);
     int setCache(int iValue);
     void *getJpegConfig(void);
+    int selectJpegHW(int iSel);
+    int ckeckJpegSelct(enum MODE eMode);
 
 protected:
     // variables
@@ -115,11 +118,12 @@ protected:
     bool t_bFlagCreateInBuf;
     bool t_bFlagCreateOutBuf;
     bool t_bFlagExcute;
+    bool t_bFlagSelect;
     int t_iCacheValue;
-
+    int t_iSelectNode; // 0:auto , 1:fimp , 2:hx or fimp2;
     int t_iPlaneNum;
-
     int t_iJpegFd;
+
     struct CONFIG t_stJpegConfig;
     struct BUFFER t_stJpegInbuf;
     struct BUFFER t_stJpegOutbuf;
