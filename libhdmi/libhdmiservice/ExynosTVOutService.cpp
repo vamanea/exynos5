@@ -38,6 +38,9 @@ pthread_mutex_t sync_mutex_video;
 pthread_cond_t  sync_cond_ui;
 pthread_mutex_t sync_mutex_ui;
 
+pthread_mutex_t sync_mutex_disable_ui;
+pthread_mutex_t sync_mutex_disable_video;
+
 namespace android {
 #define DEFAULT_LCD_WIDTH               2560
 #define DEFAULT_LCD_HEIGHT              1600
@@ -65,6 +68,7 @@ namespace android {
             pthread_mutex_lock(&sync_mutex_ui);
             pthread_cond_wait(&sync_cond_ui, &sync_mutex_ui);
             pthread_mutex_unlock(&sync_mutex_ui);
+            pthread_mutex_lock(&sync_mutex_disable_ui);
 
 #ifdef CHECK_UI_TIME
             struct timeval hdmi_start, hdmi_end;
@@ -88,6 +92,8 @@ namespace android {
             ALOGD("UI rendering : used time : %d",
                     (hdmi_end.tv_sec - hdmi_start.tv_sec)*1000+(hdmi_end.tv_usec - hdmi_start.tv_usec)/1000);
 #endif
+            mMsgForUI = NULL;
+            pthread_mutex_unlock(&sync_mutex_disable_ui);
         }
         return 0;
     }
@@ -98,6 +104,7 @@ namespace android {
             pthread_mutex_lock(&sync_mutex_video);
             pthread_cond_wait(&sync_cond_video, &sync_mutex_video);
             pthread_mutex_unlock(&sync_mutex_video);
+            pthread_mutex_lock(&sync_mutex_disable_video);
 
 #ifdef CHECK_VIDEO_TIME
             struct timeval hdmi_start, hdmi_end;
@@ -121,6 +128,8 @@ namespace android {
             ALOGD("VIDEO rendering : used time : %d",
                     (hdmi_end.tv_sec - hdmi_start.tv_sec)*1000+(hdmi_end.tv_usec - hdmi_start.tv_usec)/1000);
 #endif
+            mMsgForVideo = NULL;
+            pthread_mutex_unlock(&sync_mutex_disable_video);
         }
         return 0;
     }
@@ -149,11 +158,16 @@ namespace android {
         setLCDsize();
         mHdmiFlushThreadForUI = new HDMIFlushThreadForUI(this);
         mHdmiFlushThreadForVIDEO = new HDMIFlushThreadForVIDEO(this);
+        mMsgForUI = NULL;
+        mMsgForVideo = NULL;
 
         pthread_cond_init(&sync_cond_video, NULL);
         pthread_mutex_init(&sync_mutex_video, NULL);
         pthread_cond_init(&sync_cond_ui, NULL);
         pthread_mutex_init(&sync_mutex_ui, NULL);
+
+        pthread_mutex_init(&sync_mutex_disable_ui, NULL);
+        pthread_mutex_init(&sync_mutex_disable_video, NULL);
 
         if (mExynosHdmi.create(mLCD_width, mLCD_height) == false)
             ALOGE("%s::mExynosHdmi.create() fail", __func__);
@@ -559,6 +573,24 @@ namespace android {
 
         if (hdmiCableInserted() == false)
             return;
+
+        bool safe = false;
+        pthread_mutex_t *mutex;
+        sp<ExynosHdmiEventMsg> *msg;
+
+        if (hdmiLayer == HDMI_LAYER_VIDEO) {
+            mutex = &sync_mutex_disable_video;
+            msg = &mMsgForVideo;
+        } else {
+            mutex = &sync_mutex_disable_ui;
+            msg = &mMsgForUI;
+        }
+
+        while (safe == false) {
+            pthread_mutex_lock(mutex);
+            safe = *msg == NULL;
+            pthread_mutex_unlock(mutex);
+        }
 
         mExynosHdmi.setHdmiLayerDisable(hdmiLayer);
     }
