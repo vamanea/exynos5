@@ -36,9 +36,6 @@
 
 #include "ExynosJpegApi.h"
 
-#define JPEG_DEC_NODE        "/dev/video11"
-#define JPEG_ENC_NODE        "/dev/video12"
-
 #define MAX_JPG_WIDTH (8192)
 #define MAX_JPG_HEIGHT (8192)
 
@@ -369,7 +366,9 @@ int ExynosJpegBase::create(enum MODE eMode)
     t_bFlagCreateInBuf = false;
     t_bFlagCreateOutBuf = false;
     t_bFlagExcute = false;
+    t_bFlagSelect = false;
     t_iCacheValue = 0;
+    t_iSelectNode = 0; // auto
 
     t_iPlaneNum = 0;
 
@@ -390,36 +389,6 @@ int ExynosJpegBase::openJpeg(enum MODE eMode)
         JPEG_ERROR_LOG("[%s]: QUERYCAP failed\n", __func__);
         close(t_iJpegFd);
         return ERROR_CANNOT_OPEN_JPEG_DEVICE;
-    }
-
-    return ERROR_NONE;
-}
-
-int ExynosJpegBase::openNode(enum MODE eMode)
-{
-    switch (eMode) {
-    case MODE_ENCODE:
-        t_iJpegFd = open(JPEG_ENC_NODE, O_RDWR, 0);
-        break;
-    case MODE_DECODE:
-        t_iJpegFd = open(JPEG_DEC_NODE, O_RDWR, 0);
-        break;
-    default:
-        t_iJpegFd = -1;
-        return ERROR_INVALID_JPEG_MODE;
-        break;
-    }
-
-    if (t_iJpegFd < 0) {
-        t_iJpegFd = -1;
-        JPEG_ERROR_LOG("[%s]: JPEG_NODE open failed\n", __func__);
-        return ERROR_CANNOT_OPEN_JPEG_DEVICE;
-    }
-
-    if (t_iJpegFd <= 0) {
-        t_iJpegFd = -1;
-        JPEG_ERROR_LOG("ERR(%s):JPEG device was closed\n", __func__);
-        return ERROR_JPEG_DEVICE_ALREADY_CLOSED;
     }
 
     return ERROR_NONE;
@@ -608,71 +577,6 @@ int ExynosJpegBase::setCache(int iValue)
     }
 
     t_iCacheValue = iValue;
-
-    return ERROR_NONE;
-}
-
-int ExynosJpegBase::setColorFormat(enum MODE eMode, int iV4l2ColorFormat)
-{
-    if (t_bFlagCreate == false) {
-        return ERROR_JPEG_DEVICE_NOT_CREATE_YET;
-    }
-
-    switch (eMode) {
-    case MODE_ENCODE:
-        switch(iV4l2ColorFormat) {
-        case V4L2_PIX_FMT_YUYV:
-        case V4L2_PIX_FMT_NV12:
-        case V4L2_PIX_FMT_RGB565X:
-        case V4L2_PIX_FMT_BGR32:
-        case V4L2_PIX_FMT_YUV420:
-        case V4L2_PIX_FMT_NV16:
-        case V4L2_PIX_FMT_RGB32:
-            t_stJpegConfig.pix.enc_fmt.in_fmt = iV4l2ColorFormat;
-            break;
-        default:
-            JPEG_ERROR_LOG("%s::Invalid input color format(%d) fail\n", __func__, iV4l2ColorFormat);
-            t_iPlaneNum = 0;
-            return ERROR_INVALID_COLOR_FORMAT;
-        }
-        break;
-    case MODE_DECODE:
-        switch(iV4l2ColorFormat) {
-        case V4L2_PIX_FMT_YUYV:
-        case V4L2_PIX_FMT_NV12:
-        case V4L2_PIX_FMT_BGR32:
-        case V4L2_PIX_FMT_RGB565X:
-        case V4L2_PIX_FMT_YUV420:
-        case V4L2_PIX_FMT_NV16:
-        case V4L2_PIX_FMT_RGB32:
-            t_stJpegConfig.pix.dec_fmt.out_fmt = iV4l2ColorFormat;
-            break;
-        default:
-            JPEG_ERROR_LOG("%s::Invalid input color format(%d) fail\n", __func__, iV4l2ColorFormat);
-            t_iPlaneNum = 0;
-            return ERROR_INVALID_COLOR_FORMAT;
-        }
-        break;
-    default:
-        return ERROR_INVALID_JPEG_MODE;
-        break;
-    }
-
-    switch (iV4l2ColorFormat) {
-    case V4L2_PIX_FMT_YUYV:
-    case V4L2_PIX_FMT_YUV420:
-    case V4L2_PIX_FMT_NV12:
-    case V4L2_PIX_FMT_NV16:
-    case V4L2_PIX_FMT_RGB565X:
-    case V4L2_PIX_FMT_BGR32:
-    case V4L2_PIX_FMT_RGB32:
-        t_iPlaneNum = 1;
-        break;
-    default:
-        JPEG_ERROR_LOG("%s::Invalid input color format(%d) fail\n", __func__, iV4l2ColorFormat);
-        t_iPlaneNum = 0;
-        return ERROR_INVALID_COLOR_FORMAT;
-    }
 
     return ERROR_NONE;
 }
