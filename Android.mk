@@ -21,7 +21,6 @@ common_exynos5_dirs := \
 	libion_exynos \
 	libswconverter \
 	libhwc \
-	libhwjpeg \
 	libcamera \
 	libhdmi
 
