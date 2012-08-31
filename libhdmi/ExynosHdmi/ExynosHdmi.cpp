@@ -276,8 +276,10 @@ ExynosHdmi::ExynosHdmi():
     mHdmiResolutionValueList[5] = 1080150;
     mHdmiResolutionValueList[6] = 720960;
     mHdmiResolutionValueList[7] = 720950;
-    mHdmiResolutionValueList[8] = 576950;
-    mHdmiResolutionValueList[9] = 480960;
+    mHdmiResolutionValueList[8] = 5769501;
+    mHdmiResolutionValueList[9] = 5769502;
+    mHdmiResolutionValueList[10] = 4809601;
+    mHdmiResolutionValueList[11] = 4809602;
 
     mHdmiS3dTbResolutionValueList[0] = 1080960;
     mHdmiS3dTbResolutionValueList[1] = 1080924;

@@ -39,7 +39,7 @@
 #define MAX_MIXER_NUM               (1)
 #define MAX_BUFFERS_MIXER           (3)
 
-#define NUM_SUPPORTED_RESOLUTION_2D      (10)
+#define NUM_SUPPORTED_RESOLUTION_2D      (12)
 #define NUM_SUPPORTED_RESOLUTION_S3D_TB  (4)
 #define NUM_SUPPORTED_RESOLUTION_S3D_SBS (3)
 
