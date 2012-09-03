@@ -634,7 +634,7 @@ int exynos_mxr_stop_n_clear(
         /* to handle special scenario.*/
         mxr_handle->buf_idx  = 0;
         mxr_handle->qbuf_cnt = 0;
-        ALOGD("%s::Mixer is already stopped", __func__);
+        ALOGD("%s::Mixer(layer_id=%d) is already stopped", __func__, mxr_handle->layer_id);
         goto SKIP_STREAMOFF;
     }
 
@@ -681,7 +681,7 @@ int exynos_mxr_just_stop (
         /* to handle special scenario.*/
         mxr_handle->buf_idx = 0;
         mxr_handle->qbuf_cnt = 0;
-        ALOGD("%s::GSC is already stopped", __func__);
+        ALOGD("%s::Mixer(layer_id=%d) is already stopped", __func__, mxr_handle->layer_id);
         goto SKIP_STREAMOFF;
     }
 
