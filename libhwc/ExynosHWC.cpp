@@ -1019,6 +1019,13 @@ static int hwc_prepare(hwc_composer_device_t *dev, hwc_layer_list_t* list)
         if (overlay_win_cnt < NUM_OF_WIN) {
             compositionType = get_hwc_compos_decision(ctx, cur, overlay_win_cnt);
 
+#if defined(BOARD_USES_HDMI)
+            if (ctx->num_of_ext_disp_video_layer >= 2)
+                ctx->hdmi_layer_buf_index[android::ExynosHdmiClient::HDMI_LAYER_VIDEO] = NOT_DEFINED;
+            else if ((compositionType == HWC_OVERLAY) &&
+                    (prev_handle->usage & GRALLOC_USAGE_EXTERNAL_DISP))
+                ctx->hdmi_layer_buf_index[android::ExynosHdmiClient::HDMI_LAYER_VIDEO] = i;
+#endif
             if (compositionType == HWC_FRAMEBUFFER) {
                 cur->compositionType = HWC_FRAMEBUFFER;
                 ctx->num_of_fb_layer++;
@@ -1039,15 +1046,6 @@ static int hwc_prepare(hwc_composer_device_t *dev, hwc_layer_list_t* list)
             cur->compositionType = HWC_FRAMEBUFFER;
             ctx->num_of_fb_layer++;
         }
-
-#if defined(BOARD_USES_HDMI)
-        if (ctx->num_of_ext_disp_video_layer >= 2) {
-        } else if ((compositionType == HWC_OVERLAY) &&
-                (prev_handle->usage & GRALLOC_USAGE_EXTERNAL_DISP)) {
-            ctx->hdmi_layer_buf_index[android::ExynosHdmiClient::HDMI_LAYER_VIDEO] = i;
-        } else if (prev_handle != NULL) {
-        }
-#endif
     }
 
 #if defined(BOARD_USES_HDMI)
