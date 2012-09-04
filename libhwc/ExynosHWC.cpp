@@ -694,7 +694,6 @@ static int assign_overlay_window(struct hwc_context_t *ctx, hwc_layer_t *cur,
             } else {
                 rect.x = (rect.x + 1) & (~1);
                 rect.y = (rect.y + 1) & (~1);
-                rect.w = (rect.w + 1) & (~1);
             }
         }
 
