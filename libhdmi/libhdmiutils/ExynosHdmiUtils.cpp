@@ -77,7 +77,7 @@ int m_mxr_get_plane_size(
         plane_size[0] = width * height * 2;
         break;
     default:
-        ALOGE("%s::unmatched v4l_pixel_format color_space(0x%x)\n",
+        HDMI_Log(HDMI_LOG_ERROR, "%s::unmatched v4l_pixel_format color_space(0x%x)\n",
              __func__, v4l_pixel_format);
         return -1;
         break;
@@ -109,7 +109,7 @@ void *exynos_mxr_create(
     struct MXR_HANDLE *mxr_handle = (struct MXR_HANDLE *)malloc(sizeof(struct MXR_HANDLE));
 
     if (mxr_handle == NULL) {
-        ALOGE("%s::malloc(struct MXR_HANDLE) fail", __func__);
+        HDMI_Log(HDMI_LOG_ERROR, "%s::malloc(struct MXR_HANDLE) fail", __func__);
         goto mxr_output_err;
     }
 
@@ -128,7 +128,7 @@ void *exynos_mxr_create(
     sprintf(mutex_name, "%sOp%d", LOG_TAG_HDMI, op_id);
     mxr_handle->op_mutex = exynos_mutex_create(EXYNOS_MUTEX_TYPE_PRIVATE, mutex_name);
     if (mxr_handle->op_mutex == NULL) {
-        ALOGE("%s::exynos_mutex_create(%s) fail", __func__, mutex_name);
+        HDMI_Log(HDMI_LOG_ERROR, "%s::exynos_mutex_create(%s) fail", __func__, mutex_name);
         goto mxr_output_err;
     }
 
@@ -138,7 +138,7 @@ void *exynos_mxr_create(
     sprintf(node, "%s%d", PFX_NODE_MEDIADEV, 0);
     media = exynos_media_open(node);
     if (media == NULL) {
-        ALOGE("%s::exynos_media_open failed (node=%s)", __func__, node);
+        HDMI_Log(HDMI_LOG_ERROR, "%s::exynos_media_open failed (node=%s)", __func__, node);
         goto mxr_output_err;
     }
     mxr_handle->media = media;
@@ -147,7 +147,7 @@ void *exynos_mxr_create(
     sprintf(devname, PFX_MXR_VIDEODEV_ENTITY, dev_num, layer_id);
     mxr_vd_entity = exynos_media_get_entity_by_name(media, devname, strlen(devname));
     if (!mxr_vd_entity) {
-        ALOGE("%s:: failed to get the mixer vd entity", __func__);
+        HDMI_Log(HDMI_LOG_ERROR, "%s:: failed to get the mixer vd entity", __func__);
         goto mxr_output_err;
     }
     mxr_handle->mxr_vd_entity = mxr_vd_entity;
@@ -155,7 +155,7 @@ void *exynos_mxr_create(
     sprintf(devname, PFX_MXR_SUBDEV_ENTITY, dev_num);
     mxr_sd_entity = exynos_media_get_entity_by_name(media, devname, strlen(devname));
     if (!mxr_sd_entity) {
-        ALOGE("%s:: failed to get the mxr sd entity", __func__);
+        HDMI_Log(HDMI_LOG_ERROR, "%s:: failed to get the mxr sd entity", __func__);
         goto mxr_output_err;
     }
     mxr_handle->mxr_sd_entity = mxr_sd_entity;
@@ -164,7 +164,7 @@ void *exynos_mxr_create(
     sprintf(devname, PFX_MXR_VIDEODEV_ENTITY, dev_num, layer_id);
     mxr_vd_entity->fd = exynos_v4l2_open_devname(devname, O_RDWR);
     if (mxr_vd_entity->fd < 0) {
-        ALOGE("%s: mxr video-dev open fail", __func__);
+        HDMI_Log(HDMI_LOG_ERROR, "%s: mxr video-dev open fail", __func__);
         goto mxr_output_err;
     }
 
@@ -172,7 +172,7 @@ void *exynos_mxr_create(
     sprintf(devname, PFX_MXR_SUBDEV_ENTITY, dev_num);
     mxr_sd_entity->fd = exynos_subdev_open_devname(devname, O_RDWR);
     if (mxr_sd_entity->fd < 0) {
-        ALOGE("%s: mxr sub-dev open fail", __func__);
+        HDMI_Log(HDMI_LOG_ERROR, "%s: mxr sub-dev open fail", __func__);
         goto mxr_output_err;
     }
 
@@ -186,7 +186,7 @@ void *exynos_mxr_create(
             continue;
         } else if (exynos_media_setup_link(media, links->source, links->sink,
                     MEDIA_LNK_FL_ENABLED) < 0) {
-            ALOGE("%s::exynos_media_setup_link [src.entity=%d->sink.entity=%d] failed",
+            HDMI_Log(HDMI_LOG_ERROR, "%s::exynos_media_setup_link [src.entity=%d->sink.entity=%d] failed",
                 __func__, links->source->entity->info.id, links->sink->entity->info.id);
             goto mxr_output_err;
         }
@@ -196,7 +196,7 @@ void *exynos_mxr_create(
           V4L2_CAP_VIDEO_OUTPUT_MPLANE;
 
     if (exynos_v4l2_querycap(mxr_vd_entity->fd, cap) == false) {
-        ALOGE("%s::exynos_v4l2_querycap() fail", __func__);
+        HDMI_Log(HDMI_LOG_ERROR, "%s::exynos_v4l2_querycap() fail", __func__);
         goto mxr_output_err;
     }
 
@@ -210,7 +210,7 @@ mxr_output_err:
             exynos_mutex_unlock(mxr_handle->op_mutex);
 
         if (exynos_mutex_destroy(mxr_handle->op_mutex) == false)
-            ALOGE("%s::exynos_mutex_destroy(op_mutex) fail", __func__);
+            HDMI_Log(HDMI_LOG_ERROR, "%s::exynos_mutex_destroy(op_mutex) fail", __func__);
 
         free(mxr_handle);
     }
@@ -228,7 +228,7 @@ void exynos_mxr_destroy(
     struct MXR_HANDLE *mxr_handle;
 
     if (handle == NULL) {
-        ALOGE("%s::handle == NULL() fail", __func__);
+        HDMI_Log(HDMI_LOG_ERROR, "%s::handle == NULL() fail", __func__);
         return;
     }
 
@@ -237,13 +237,13 @@ void exynos_mxr_destroy(
     exynos_mutex_lock(mxr_handle->op_mutex);
 
     if (mxr_handle == NULL) {
-        ALOGE("%s::mxr_handle is NULL", __func__);
+        HDMI_Log(HDMI_LOG_ERROR, "%s::mxr_handle is NULL", __func__);
         return;
     }
 
     if (mxr_handle->stream_on == true) {
         if (exynos_mxr_stop_n_clear(mxr_handle) < 0)
-            ALOGE("%s::exynos_mxr_out_stop() fail", __func__);
+            HDMI_Log(HDMI_LOG_ERROR, "%s::exynos_mxr_out_stop() fail", __func__);
 
         mxr_handle->stream_on = false;
     }
@@ -261,7 +261,7 @@ void exynos_mxr_destroy(
                 links->sink->entity   != mxr_handle->mxr_sd_entity) {
                 continue;
             } else if (exynos_media_setup_link(mxr_handle->media, links->source, links->sink, 0) < 0) {
-                ALOGE("%s::exynos_media_setup_link [src.entity=%d->sink.entity=%d] failed",
+                HDMI_Log(HDMI_LOG_ERROR, "%s::exynos_media_setup_link [src.entity=%d->sink.entity=%d] failed",
                     __func__, links->source->entity->info.id, links->sink->entity->info.id);
                 return;
             }
@@ -288,7 +288,7 @@ void exynos_mxr_destroy(
     exynos_mutex_unlock(mxr_handle->op_mutex);
 
     if (exynos_mutex_destroy(mxr_handle->op_mutex) == false)
-        ALOGE("%s::exynos_mutex_destroy(op_mutex) fail", __func__);
+        HDMI_Log(HDMI_LOG_ERROR, "%s::exynos_mutex_destroy(op_mutex) fail", __func__);
 
     if (mxr_handle)
         free(mxr_handle);
@@ -319,14 +319,14 @@ int exynos_mxr_config(
     int          ctrl_id = 1;
 
     if (handle == NULL) {
-        ALOGE("%s::handle == NULL() fail", __func__);
+        HDMI_Log(HDMI_LOG_ERROR, "%s::handle == NULL() fail", __func__);
         return -1;
     }
 
     mxr_handle = (struct MXR_HANDLE *)handle;
 
     if (mxr_handle->stream_on != false) {
-        ALOGE("Error: Src is already streamed on !!!!");
+        HDMI_Log(HDMI_LOG_ERROR, "Error: Src is already streamed on !!!!");
         return -1;
      }
 
@@ -361,7 +361,7 @@ int exynos_mxr_config(
     fmt.fmt.pix_mp.num_planes  = src_planes;
 
     if (exynos_v4l2_s_fmt(mxr_handle->mxr_vd_entity->fd, &fmt) < 0) {
-            ALOGE("%s::videodev set format failed", __func__);
+            HDMI_Log(HDMI_LOG_ERROR, "%s::videodev set format failed", __func__);
             return -1;
     }
 
@@ -373,7 +373,7 @@ int exynos_mxr_config(
     crop.c.height = mxr_handle->src_img.h;
 
     if (exynos_v4l2_s_crop(mxr_handle->mxr_vd_entity->fd, &crop) < 0) {
-        ALOGE("%s::videodev set crop failed", __func__);
+        HDMI_Log(HDMI_LOG_ERROR, "%s::videodev set crop failed", __func__);
         return -1;
     }
 
@@ -404,7 +404,7 @@ int exynos_mxr_config(
     sd_fmt.format.code   = V4L2_MBUS_FMT_XRGB8888_4X8_LE;
 
     if (exynos_subdev_s_fmt(mxr_handle->mxr_sd_entity->fd, &sd_fmt) < 0) {
-        ALOGE("%s::Mixer subdev set format failed (PAD=%d)", __func__, sd_fmt.pad);
+        HDMI_Log(HDMI_LOG_ERROR, "%s::Mixer subdev set format failed (PAD=%d)", __func__, sd_fmt.pad);
         return -1;
     }
 
@@ -417,7 +417,7 @@ int exynos_mxr_config(
     sd_crop.rect.height = mxr_handle->src_img.h;
 
     if (exynos_subdev_s_crop(mxr_handle->mxr_sd_entity->fd, &sd_crop) < 0) {
-        ALOGE("%s::Mixer subdev set crop failed (PAD=%d)", __func__, sd_crop.pad);
+        HDMI_Log(HDMI_LOG_ERROR, "%s::Mixer subdev set crop failed (PAD=%d)", __func__, sd_crop.pad);
         return -1;
     }
 
@@ -447,7 +447,7 @@ int exynos_mxr_config(
     sd_fmt.format.code   = dst_color_space;
 
     if (exynos_subdev_s_fmt(mxr_handle->mxr_sd_entity->fd, &sd_fmt) < 0) {
-        ALOGE("%s::Mixer subdev set format failed (PAD=%d)", __func__, sd_fmt.pad);
+        HDMI_Log(HDMI_LOG_ERROR, "%s::Mixer subdev set format failed (PAD=%d)", __func__, sd_fmt.pad);
         return -1;
     }
 
@@ -460,7 +460,7 @@ int exynos_mxr_config(
     sd_crop.rect.height = mxr_handle->dst_img.h;
 
     if (exynos_subdev_s_crop(mxr_handle->mxr_sd_entity->fd, &sd_crop) < 0) {
-        ALOGE("%s::Mixer subdev set crop failed (PAD=%d)", __func__, sd_crop.pad);
+        HDMI_Log(HDMI_LOG_ERROR, "%s::Mixer subdev set crop failed (PAD=%d)", __func__, sd_crop.pad);
         return -1;
     }
 
@@ -476,7 +476,7 @@ int exynos_mxr_config(
     if (exynos_v4l2_s_ctrl(mxr_handle->mxr_vd_entity->fd,
         V4L2_CID_TV_PIXEL_BLEND_ENABLE,
         mxr_handle->src_img.blending) < 0) {
-        ALOGE("%s:: exynos_v4l2_s_ctrl (V4L2_CID_TV_PIXEL_BLEND_ENABLE: %d) failed",
+        HDMI_Log(HDMI_LOG_ERROR, "%s:: exynos_v4l2_s_ctrl (V4L2_CID_TV_PIXEL_BLEND_ENABLE: %d) failed",
             __func__, mxr_handle->src_img.blending);
         return -1;
     }
@@ -486,7 +486,7 @@ int exynos_mxr_config(
     reqbuf.count  = MAX_BUFFERS_MIXER;
 
     if (exynos_v4l2_reqbufs(mxr_handle->mxr_vd_entity->fd, &reqbuf) < 0) {
-        ALOGE("%s::request buffers failed", __func__);
+        HDMI_Log(HDMI_LOG_ERROR, "%s::request buffers failed", __func__);
         return -1;
     }
 
@@ -507,7 +507,7 @@ int exynos_mxr_run(void *handle,
     unsigned int plane_size[NUM_OF_MXR_PLANES];
 
     if (handle == NULL) {
-        ALOGE("%s::handle == NULL() fail", __func__);
+        HDMI_Log(HDMI_LOG_ERROR, "%s::handle == NULL() fail", __func__);
         return -1;
     }
 
@@ -529,7 +529,7 @@ int exynos_mxr_run(void *handle,
 
     if (m_mxr_get_plane_size(plane_size, mxr_handle->src_img.fw,
                              mxr_handle->src_img.fh, src_color_space) < 0) {
-        ALOGE("%s:m_gsc_get_plane_size:fail", __func__);
+        HDMI_Log(HDMI_LOG_ERROR, "%s:m_gsc_get_plane_size:fail", __func__);
         return -1;
     }
 
@@ -541,7 +541,7 @@ int exynos_mxr_run(void *handle,
 
     /* Queue the buf */
     if (exynos_v4l2_qbuf(mxr_handle->mxr_vd_entity->fd, &buf) < 0) {
-        ALOGE("%s::queue buffer failed (index=%d)(mSrcBufNum=%d)", __func__,
+        HDMI_Log(HDMI_LOG_ERROR, "%s::queue buffer failed (index=%d)(mSrcBufNum=%d)", __func__,
             mxr_handle->buf_idx, MAX_BUFFERS_MIXER);
         return -1;
     }
@@ -560,7 +560,7 @@ int exynos_mxr_run(void *handle,
 #endif
         {
             if (exynos_v4l2_streamon(mxr_handle->mxr_vd_entity->fd, buf.type) < 0) {
-                ALOGE("%s::stream on failed", __func__);
+                HDMI_Log(HDMI_LOG_ERROR, "%s::stream on failed", __func__);
                 return -1;
             }
             mxr_handle->stream_on = true;
@@ -584,7 +584,7 @@ int exynos_mxr_wait_done (
     int                i;
 
     if (handle == NULL) {
-        ALOGE("%s::handle == NULL() fail", __func__);
+        HDMI_Log(HDMI_LOG_ERROR, "%s::handle == NULL() fail", __func__);
         return -1;
     }
     mxr_handle = (struct MXR_HANDLE *)handle;
@@ -606,7 +606,7 @@ int exynos_mxr_wait_done (
 
         /* DeQueue a buf */
         if (exynos_v4l2_dqbuf(mxr_handle->mxr_vd_entity->fd, &buf) < 0) {
-            ALOGE("%s::dequeue buffer failed (index=%d)(mSrcBufNum=%d)",
+            HDMI_Log(HDMI_LOG_ERROR, "%s::dequeue buffer failed (index=%d)(mSrcBufNum=%d)",
                     __func__, mxr_handle->buf_idx, MAX_BUFFERS_MIXER);
             return -1;
         }
@@ -624,7 +624,7 @@ int exynos_mxr_stop_n_clear(
     struct v4l2_requestbuffers reqbuf;
 
     if (handle == NULL) {
-        ALOGE("%s::handle == NULL() fail", __func__);
+        HDMI_Log(HDMI_LOG_ERROR, "%s::handle == NULL() fail", __func__);
         return -1;
     }
 
@@ -634,7 +634,7 @@ int exynos_mxr_stop_n_clear(
         /* to handle special scenario.*/
         mxr_handle->buf_idx  = 0;
         mxr_handle->qbuf_cnt = 0;
-        ALOGD("%s::Mixer(layer_id=%d) is already stopped", __func__, mxr_handle->layer_id);
+        HDMI_Log(HDMI_LOG_DEBUG, "%s::Mixer(layer_id=%d) is already stopped", __func__, mxr_handle->layer_id);
         goto SKIP_STREAMOFF;
     }
 
@@ -644,7 +644,7 @@ int exynos_mxr_stop_n_clear(
 
     if (exynos_v4l2_streamoff(mxr_handle->mxr_vd_entity->fd,
                               V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE) < 0) {
-        ALOGE("%s::stream off failed", __func__);
+        HDMI_Log(HDMI_LOG_ERROR, "%s::stream off failed", __func__);
         return -1;
     }
 
@@ -656,7 +656,7 @@ SKIP_STREAMOFF:
     reqbuf.count  = 0;
 
     if (exynos_v4l2_reqbufs(mxr_handle->mxr_vd_entity->fd, &reqbuf) < 0) {
-        ALOGE("%s::request buffers failed", __func__);
+        HDMI_Log(HDMI_LOG_ERROR, "%s::request buffers failed", __func__);
         return -1;
     }
 
@@ -671,7 +671,7 @@ int exynos_mxr_just_stop (
     struct MXR_HANDLE *mxr_handle;
 
     if (handle == NULL) {
-        ALOGE("%s::handle == NULL() fail", __func__);
+        HDMI_Log(HDMI_LOG_ERROR, "%s::handle == NULL() fail", __func__);
         return -1;
     }
 
@@ -681,7 +681,7 @@ int exynos_mxr_just_stop (
         /* to handle special scenario.*/
         mxr_handle->buf_idx = 0;
         mxr_handle->qbuf_cnt = 0;
-        ALOGD("%s::Mixer(layer_id=%d) is already stopped", __func__, mxr_handle->layer_id);
+        HDMI_Log(HDMI_LOG_DEBUG, "%s::Mixer(layer_id=%d) is already stopped", __func__, mxr_handle->layer_id);
         goto SKIP_STREAMOFF;
     }
 
@@ -691,7 +691,7 @@ int exynos_mxr_just_stop (
 
     if (exynos_v4l2_streamoff(mxr_handle->mxr_vd_entity->fd,
                               V4L2_BUF_TYPE_VIDEO_OUTPUT_MPLANE) < 0) {
-        ALOGE("%s::stream off failed", __func__);
+        HDMI_Log(HDMI_LOG_ERROR, "%s::stream off failed", __func__);
         return -1;
     }
 
@@ -712,12 +712,12 @@ int exynos_mxr_set_ctrl (
     mxr_handle = (struct MXR_HANDLE *)handle;
 
     if (handle == NULL) {
-        ALOGE("%s::handle == NULL() fail", __func__);
+        HDMI_Log(HDMI_LOG_ERROR, "%s::handle == NULL() fail", __func__);
         return -1;
     }
 
     if (exynos_v4l2_s_ctrl(mxr_handle->mxr_vd_entity->fd, id, value) < 0) {
-        ALOGE("%s:: exynos_v4l2_s_ctrl (id=%d: value=%d) failed", __func__, id, value);
+        HDMI_Log(HDMI_LOG_ERROR, "%s:: exynos_v4l2_s_ctrl (id=%d: value=%d) failed", __func__, id, value);
         return -1;
     }
 
@@ -737,12 +737,12 @@ int exynos_mxr_get_ctrl (
     mxr_handle = (struct MXR_HANDLE *)handle;
 
     if (handle == NULL) {
-        ALOGE("%s::handle == NULL() fail", __func__);
+        HDMI_Log(HDMI_LOG_ERROR, "%s::handle == NULL() fail", __func__);
         return -1;
     }
 
     if (exynos_v4l2_g_ctrl(mxr_handle->mxr_vd_entity->fd, id, value) < 0) {
-        ALOGE("%s:: exynos_v4l2_s_ctrl (id=%d: value=%d) failed", __func__, id, *value);
+        HDMI_Log(HDMI_LOG_ERROR, "%s:: exynos_v4l2_s_ctrl (id=%d: value=%d) failed", __func__, id, *value);
         return -1;
     }
 
