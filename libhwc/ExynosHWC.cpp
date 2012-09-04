@@ -1063,7 +1063,7 @@ static int hwc_prepare(hwc_composer_device_t *dev, hwc_layer_list_t* list)
         else
             ctx->mHdmiClient->setHdmiDRM(android::ExynosHdmiClient::HDMI_NON_DRM_MODE);
     } else {
-        if (!ctx->num_of_ext_disp_layer)
+        if (!ctx->num_of_ext_disp_layer || ctx->num_of_ext_disp_video_layer >= 2)
             ctx->mHdmiClient->setHdmiPath(DEFAULT_UI_PATH);
         else
             ctx->mHdmiClient->setHdmiPath(HDMI_PATH_OVERLAY);
