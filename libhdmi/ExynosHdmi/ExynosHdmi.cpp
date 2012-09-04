@@ -1260,7 +1260,7 @@ bool ExynosHdmi::setUIRotation(unsigned int rotVal, unsigned int hwcLayer)
 
     /* G2D rotation */
     if (rotVal != mUIRotVal) {
-        mUIRotVal = rotVal;
+        mUIRotVal = cal_rotVal(mExynosRotator, rotVal);
         mHdmiInfoChange = true;
     }
 
@@ -1588,7 +1588,7 @@ bool ExynosHdmi::m_reset(int w, int h, int dstX, int dstY, int colorFormat, int 
                     dst_info.fh = ROUND_UP(dstH, 8);
                     dst_info.w  = ROUND_DOWN(dstW, 4);
                     dst_info.h  = ROUND_DOWN(dstH, 4);
-                    dst_info.format = HAL_PIXEL_FORMAT_RGBA_8888;
+                    dst_info.format = hdmi_dst_color_format(mExynosRotator, mUIRotVal);
                     dst_info.rot = 0;
                     dst_info.cacheable = 0;
                     dst_info.drmMode = 0;
@@ -1628,7 +1628,7 @@ bool ExynosHdmi::m_reset(int w, int h, int dstX, int dstY, int colorFormat, int 
                                                   dst_info.format,
                                                   rot_dstW,
                                                   rot_dstH,
-                                                  dst_info.format);
+                                                  HAL_PIXEL_FORMAT_RGBA_8888);
 
                         mxr_dstFW = rot_dstW;
                         mxr_dstFH = rot_dstH;
