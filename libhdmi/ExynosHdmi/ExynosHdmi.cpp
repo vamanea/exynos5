@@ -567,7 +567,7 @@ bool ExynosHdmi::connect(void)
     if (this->setHdcpMode(mHdcpMode, false) == false)
         HDMI_Log(HDMI_LOG_ERROR, "%s::setHdcpMode(%d) fail", __func__, mHdcpMode);
 
-    if (m_create_ExternalHandle(mExynosRotator) == false) {
+    if (m_create_ExternalHandle(&mExynosRotator) == false) {
         HDMI_Log(HDMI_LOG_ERROR, "%s::m_create_ExternalHandle() failed", __func__);
         return false;
     }
