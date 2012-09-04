@@ -20,8 +20,13 @@ PRODUCT_PACKAGES += \
 	libOMX.Exynos.MPEG4.Decoder \
 	libOMX.Exynos.VP8.Decoder \
 	libOMX.Exynos.MPEG4.Encoder \
-	libOMX.Exynos.AVC.Encoder \
+	libOMX.Exynos.AVC.Encoder
+
+# USE WMVCodec
+ifeq ($(BOARD_USE_WMV_CODEC),true)
+PRODUCT_PACKAGES += \
 	libOMX.Exynos.WMV.Decoder
+endif
 
 # ALP Audio
 ifeq ($(BOARD_USE_ALP_AUDIO),true)
