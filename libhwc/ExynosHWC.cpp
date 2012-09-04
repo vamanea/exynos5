@@ -911,7 +911,6 @@ GSC_MODE_CHANGE:
 #if defined(SUPPORT_RGB_OVERLAY)
 static void hwc_rgb_ovly_flag_int(struct hwc_context_t* ctx, hwc_layer_list_t* list)
 {
-    ctx->num_of_yuv_layers = get_hwc_num_of_yuv_layers(ctx, list);
     ctx->ovly_bandwidth = 0;
     ctx->is_rgb_ovly_ok = 1;
 
@@ -985,6 +984,8 @@ static int hwc_prepare(hwc_composer_device_t *dev, hwc_layer_list_t* list)
      (!ctx->need_to_try_overlay) &&
     (!ctx->dis_rect_changed)))
         return 0;
+
+    ctx->num_of_yuv_layers = get_hwc_num_of_yuv_layers(ctx, list);
 
 #if defined(SUPPORT_RGB_OVERLAY)
     hwc_rgb_ovly_flag_int(ctx, list);
