@@ -680,7 +680,10 @@ static int assign_overlay_window(struct hwc_context_t *ctx, hwc_layer_t *cur,
                 (win->gsc_mode == GSC_OUTPUT_MODE) && ctx->dis_rect_changed) {
                 return 1;
             }
-        } else if (win->ovly_lay_type == HWC_YUV_OVLY) {
+        }
+#ifdef GSC_OTF_WA
+        else if ((win->ovly_lay_type == HWC_YUV_OVLY)  &&
+                (win->gsc_mode == GSC_OUTPUT_MODE)) {
             if ((win->rect_info.w == rect.w) && (win->rect_info.h == rect.h) &&
                 (win->rect_info.x == (rect.x & (~1))) &&
                 (win->rect_info.y == (rect.y & (~1)))) {
@@ -694,6 +697,7 @@ static int assign_overlay_window(struct hwc_context_t *ctx, hwc_layer_t *cur,
                 rect.y = (rect.y + 1) & (~1);
             }
         }
+#endif
 
         if (win->power_state) {
             ctx->need_to_try_overlay = 1;
