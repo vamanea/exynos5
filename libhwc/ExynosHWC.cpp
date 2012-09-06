@@ -699,7 +699,8 @@ static int assign_overlay_window(struct hwc_context_t *ctx, hwc_layer_t *cur,
         }
 #endif
 
-        if (win->power_state) {
+        if ((win->power_state) &&
+            ((rect.w != win->rect_info.w) || (rect.h != win->rect_info.h))) {
             ctx->need_to_try_overlay = 1;
             return 1;
         }

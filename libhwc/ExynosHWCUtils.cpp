@@ -146,6 +146,7 @@ int window_close(struct hwc_win_info_t *win)
 int window_set_pos(struct hwc_win_info_t *win)
 {
     struct s3cfb_user_window window;
+    struct fb_var_screeninfo var_info;
 
 #if defined(SUPPORT_RGB_OVERLAY)
     if ((win->gsc_mode == GSC_OUTPUT_MODE) && (win->ovly_lay_type == HWC_YUV_OVLY))
@@ -157,16 +158,27 @@ int window_set_pos(struct hwc_win_info_t *win)
     SEC_HWC_Log(HWC_LOG_DEBUG, "%s:: x(%d), y(%d)",
             __func__, win->rect_info.x, win->rect_info.y);
 
+    if (ioctl(win->fd, FBIOGET_VSCREENINFO, &var_info) < 0) {
+        SEC_HWC_Log(HWC_LOG_ERROR, "FBIOGET_VSCREENINFO failed : %s",
+                strerror(errno));
+        return -1;
+    }
+
     win->var_info.xres_virtual = (win->lcd_info.xres + 15) & ~ 15;
     win->var_info.yres_virtual = win->lcd_info.yres * NUM_OF_WIN_BUF;
     win->var_info.xres = win->rect_info.w;
     win->var_info.yres = win->rect_info.h;
     win->var_info.activate &= ~FB_ACTIVATE_MASK;
     win->var_info.activate |= FB_ACTIVATE_FORCE;
-    if (ioctl(win->fd, FBIOPUT_VSCREENINFO, &(win->var_info)) < 0) {
-        SEC_HWC_Log(HWC_LOG_ERROR, "%s::FBIOPUT_VSCREENINFO(%d, %d) fail",
-          __func__, win->rect_info.w, win->rect_info.h);
-        return -1;
+    if ((win->var_info.xres_virtual  != var_info.xres_virtual) ||
+        (win->var_info.yres_virtual  != var_info.yres_virtual) ||
+        (win->var_info.xres  != var_info.xres) ||
+        (win->var_info.yres  != var_info.yres)) {
+        if (ioctl(win->fd, FBIOPUT_VSCREENINFO, &(win->var_info)) < 0) {
+            SEC_HWC_Log(HWC_LOG_ERROR, "%s::FBIOPUT_VSCREENINFO(%d, %d) fail",
+              __func__, win->rect_info.w, win->rect_info.h);
+            return -1;
+        }
     }
 
     window.x = win->rect_info.x;
