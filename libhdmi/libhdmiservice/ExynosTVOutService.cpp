@@ -499,6 +499,7 @@ namespace android {
                     return;
 #else
                 hdmiLayer = ExynosHdmi::HDMI_LAYER_GRAPHIC_0;
+                flag_full_display = 1;
 #endif
 
                 pthread_mutex_lock(&sync_mutex_ui);
