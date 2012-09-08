@@ -22,6 +22,12 @@ PRODUCT_PACKAGES += \
 	libOMX.Exynos.MPEG4.Encoder \
 	libOMX.Exynos.AVC.Encoder
 
+# USE WMACodec
+ifeq ($(BOARD_USE_WMA_CODEC),true)
+PRODUCT_PACKAGES += \
+	libOMX.Exynos.WMA.Decoder
+endif
+
 # USE MPEG2Codec
 ifeq ($(BOARD_USE_MPEG2_CODEC),true)
 PRODUCT_PACKAGES += \
