@@ -54,6 +54,21 @@ static bool is_same_3d_usage = true;
 #include <hardware_legacy/uevent.h>
 #endif
 
+#if defined (HWC_CALLBACK) || defined (HWC_GL_FB_FLIP_UEVENT)
+struct hwc_callback_entry {
+    void (*callback)(void *, private_handle_t *);
+    void *data;
+};
+
+typedef android::Vector<struct hwc_callback_entry> hwc_callback_queue_t;
+
+struct exynos5_hwc_post_data_t {
+    pthread_mutex_t                 completion_lock;
+    pthread_cond_t                  completion;
+    int     fence;
+};
+#endif
+
 #ifdef SKIP_DUMMY_UI_LAY_DRAWING
 static void get_hwc_ui_lay_skipdraw_decision(struct hwc_context_t* ctx, hwc_layer_list_t* list)
 {
@@ -1153,6 +1168,17 @@ static void src_dst_img_info_gsc_out(struct sec_img *src_img,
     return;
 }
 
+#if defined (HWC_CALLBACK) || defined (HWC_GL_FB_FLIP_UEVENT)
+static void exynos5_post_callback(void *data, private_handle_t *fb)
+{
+    exynos5_hwc_post_data_t *pdata = (exynos5_hwc_post_data_t *)data;
+    pthread_mutex_lock(&pdata->completion_lock);
+    pdata->fence = 1;
+    pthread_cond_signal(&pdata->completion);
+    pthread_mutex_unlock(&pdata->completion_lock);
+}
+#endif
+
 static int hwc_set(hwc_composer_device_t *dev,
                    hwc_display_t dpy,
                    hwc_surface_t sur,
@@ -1239,6 +1265,15 @@ static int hwc_set(hwc_composer_device_t *dev,
 
     for (int i = 0; i < NUM_OF_WIN; i++)
         skip_lay_rendering[i] = 0;
+
+#if defined (HWC_CALLBACK) || defined (HWC_GL_FB_FLIP_UEVENT)
+    hwc_callback_queue_t *queue = NULL;
+    pthread_mutex_t *lock = NULL;
+    exynos5_hwc_post_data_t data;
+    data.fence = -1;
+    pthread_mutex_init(&data.completion_lock, NULL);
+    pthread_cond_init(&data.completion, NULL);
+#endif
 
     //compose hardware layers here
     for (int i = 0; i < ctx->num_of_hwc_layer; i++) {
@@ -1475,12 +1510,49 @@ static int hwc_set(hwc_composer_device_t *dev,
         if (sur == NULL || dpy == NULL){
             return HWC_EGL_ERROR;
         }
+
+#ifdef HWC_CALLBACK
+        struct hwc_callback_entry entry;
+        entry.callback = exynos5_post_callback;
+        entry.data = &data;
+
+        queue = reinterpret_cast<hwc_callback_queue_t *>(
+                ctx->psGrallocModule->queue);
+        lock = const_cast<pthread_mutex_t *>(
+                &ctx->psGrallocModule->queue_lock);
+
+        pthread_mutex_lock(lock);
+        queue->push_front(entry);
+        pthread_mutex_unlock(lock);
+#endif
+
 #ifdef CHECK_EGL_FPS
         check_fps();
+#endif
+
+#ifdef HWC_GL_FB_FLIP_UEVENT
+        ctx->fb_buf_offset = 0;
+        android_atomic_acquire_store(0, &ctx->fb_flip_uevent_cnt);
 #endif
         EGLBoolean sucess = eglSwapBuffers((EGLDisplay)dpy, (EGLSurface)sur);
         if (!sucess)
             return HWC_EGL_ERROR;
+
+#ifdef HWC_GL_FB_FLIP_UEVENT
+        pthread_mutex_lock(&ctx->fb_flip_lock);
+        while (ctx->fb_flip_uevent_cnt == 0)
+            pthread_cond_wait(&ctx->fb_flip_completion, &ctx->fb_flip_lock);
+        pthread_mutex_unlock(&ctx->fb_flip_lock);
+
+        exynos5_post_callback(&data, NULL);
+#endif
+
+#if defined (HWC_CALLBACK) || defined (HWC_GL_FB_FLIP_UEVENT)
+        pthread_mutex_lock(&data.completion_lock);
+        while (data.fence == -1)
+            pthread_cond_wait(&data.completion, &data.completion_lock);
+        pthread_mutex_unlock(&data.completion_lock);
+#endif
 
 #if defined(TURN_OFF_UI_WINDOW)
         window_show(&ctx->ui_win);
@@ -1524,6 +1596,24 @@ static int hwc_set(hwc_composer_device_t *dev,
     }
 
     return 0;
+}
+
+static uint32_t handle_fbFlip_uevent(const char *buff, int len)
+{
+    uint32_t bufOffset = 0;
+    const char *s = buff;
+
+    s += strlen(s) + 1;
+    while (*s) {
+        if (!strncmp(s, "PAN_DISPLAY_YOFFSET=", strlen("PAN_DISPLAY_YOFFSET=")))
+            bufOffset = strtoull(s + strlen("PAN_DISPLAY_YOFFSET="), NULL, 0);
+
+        s += strlen(s) + 1;
+        if (s - buff >= len)
+            break;
+    }
+
+    return bufOffset;
 }
 
 #ifdef    VSYNC_THREAD_ENABLE
@@ -1605,6 +1695,16 @@ static void *hwc_vsync_thread(void *data)
     uevent_init();
     while(true) {
         int len = uevent_next_event(uevent_desc, sizeof(uevent_desc) - 2);
+#ifdef HWC_GL_FB_FLIP_UEVENT
+        bool fbFlipEvent = !strcmp(uevent_desc, FB_FLIP_DEV_NAME);
+        if (fbFlipEvent) {
+            pthread_mutex_lock(&ctx->fb_flip_lock);
+            pthread_cond_signal(&ctx->fb_flip_completion);
+            ctx->fb_buf_offset = handle_fbFlip_uevent(uevent_desc, len);
+            android_atomic_inc(&ctx->fb_flip_uevent_cnt);
+            pthread_mutex_unlock(&ctx->fb_flip_lock);
+        }
+#endif
         bool vsync = !strcmp(uevent_desc, VSYNC_DEV_NAME);
         if(vsync)
             handle_vsync_uevent(ctx, uevent_desc, len);
@@ -1755,6 +1855,11 @@ static int hwc_device_open(const struct hw_module_t* module, const char* name,
 
 #if defined(BOARD_USES_HDMI)
     dev->mHdmiClient = android::ExynosHdmiClient::getInstance();
+#endif
+
+#ifdef HWC_GL_FB_FLIP_UEVENT
+    pthread_mutex_init(&dev->fb_flip_lock, NULL);
+    pthread_cond_init(&dev->fb_flip_completion, NULL);
 #endif
 
 #ifdef    VSYNC_THREAD_ENABLE

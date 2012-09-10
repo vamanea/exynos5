@@ -51,7 +51,7 @@
 #endif
 
 #include "ExynosHWCModule.h"
-
+#include <utils/Vector.h>
 #if defined(BOARD_USES_HDMI)
 #include "ExynosHdmiClient.h"
 #endif
@@ -224,6 +224,12 @@ struct hwc_context_t {
 #ifdef  VSYNC_THREAD_ENABLE
     hwc_procs_t               *procs;
     pthread_t                 vsync_thread;
+#endif
+#ifdef HWC_GL_FB_FLIP_UEVENT
+    int     fb_flip_uevent_cnt;
+    uint32_t   fb_buf_offset;
+    pthread_mutex_t fb_flip_lock;
+    pthread_cond_t  fb_flip_completion;
 #endif
     int     cur_blend_mode;
     int     need_to_try_overlay;
