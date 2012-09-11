@@ -54,7 +54,7 @@ bool ExynosHdmi::CECThread::threadLoop()
         Mutex::Autolock lock(mThreadLoopLock);
         mFlagRunning = true;
 
-        size = CECReceiveMessage(buffer, CEC_MAX_FRAME_SIZE, 100000);
+        size = CECReceiveMessage(buffer, CEC_MAX_FRAME_SIZE, 1000);
 
         if (!size) // no data available or ctrl-c
             return true;
@@ -76,8 +76,11 @@ bool ExynosHdmi::CECThread::threadLoop()
         }
 
         if (!CECCheckMessageSize(opcode, size)) {
-            HDMI_Log(HDMI_LOG_ERROR, "### invalid message size: %d(opcode: 0x%x) ###", size, opcode);
-            return true;
+            /* For some reason the TV sometimes sends messages that are too long
+             * Dropping these causes the connect process to fail, so for now we
+             * simply ignore the extra data and process the message as if it had
+             * the correct size */
+            HDMI_Log(HDMI_LOG_DEBUG, "### invalid message size: %d(opcode: 0x%x) ###", size, opcode);
         }
 
         /* check if message broadcasted/directly addressed */
@@ -102,6 +105,7 @@ bool ExynosHdmi::CECThread::threadLoop()
             size = 5;
             break;
 
+        case CEC_OPCODE_SET_STREAM_PATH:
         case CEC_OPCODE_REQUEST_ACTIVE_SOURCE:
             ALOGD("[CEC_OPCODE_REQUEST_ACTIVE_SOURCE]");
             /* responce with "Active Source" */
@@ -111,6 +115,43 @@ bool ExynosHdmi::CECThread::threadLoop()
             buffer[3] = mPaddr & 0xFF;
             size = 4;
             ALOGD("Tx : [CEC_OPCODE_ACTIVE_SOURCE]");
+            break;
+
+        case CEC_OPCODE_GIVE_DEVICE_POWER_STATUS:
+            ALOGD("[CEC_OPCODE_GIVE_DEVICE_POWER_STATUS]");
+            /* respond with "Report Power Status" */
+            buffer[0] = (mLaddr << 4) | ldst;
+            buffer[1] = CEC_OPCODE_REPORT_POWER_STATUS;
+            buffer[2] = 0;
+            size = 3;
+            break;
+
+        case CEC_OPCODE_REPORT_POWER_STATUS:
+            ALOGD("[CEC_OPCODE_REPORT_POWER_STATUS]");
+            /* send Power On message */
+            if (buffer[2] == 0 || buffer[2] == 0x2) {
+                ALOGD("TV is already on");
+                return true;
+            }
+            buffer[0] = (mLaddr << 4) | ldst;
+            buffer[1] = CEC_OPCODE_USER_CONTROL_PRESSED;
+            buffer[2] = 0x6D;
+            size = 3;
+            break;
+
+        case CEC_OPCODE_USER_CONTROL_PRESSED:
+            ALOGD("[CEC_OPCODE_USER_CONTROL_PRESSED]");
+            buffer[0] = (mLaddr << 4) | ldst;
+            size = 1;
+            break;
+
+        case CEC_OPCODE_GIVE_DECK_STATUS:
+            ALOGD("[CEC_OPCODE_GIVE_DECK_STATUS]");
+            /* respond with "Deck Status" */
+            buffer[0] = (mLaddr << 4) | ldst;
+            buffer[1] = CEC_OPCODE_DECK_STATUS;
+            buffer[2] = 0x11;
+            size = 3;
             break;
 
         case CEC_OPCODE_ABORT:
@@ -182,6 +223,15 @@ bool ExynosHdmi::CECThread::start()
     }
 
     HDMI_Log(HDMI_LOG_DEBUG, "request to run CECThread");
+
+    /* Request power state from TV */
+    unsigned char buffer[CEC_MAX_FRAME_SIZE];
+    int size;
+    buffer[0] = (mLaddr << 4);
+    buffer[1] = CEC_OPCODE_GIVE_DEVICE_POWER_STATUS;
+    size = 2;
+    if (CECSendMessage(buffer, size) != size)
+        HDMI_Log(HDMI_LOG_ERROR, "CECSendMessage(%#x) failed!!!", buffer[0]);
 
     status_t ret = run("ExynosHdmi::CECThread", PRIORITY_DISPLAY);
     if (ret != NO_ERROR) {
@@ -1399,11 +1449,6 @@ bool ExynosHdmi::m_reset(int w, int h, int dstX, int dstY, int colorFormat, int 
     if (mHdmiInfoChange == true || mHdmiPathChange == true) {
         HDMI_Log(HDMI_LOG_DEBUG, "mHdmiInfoChange: %d", mHdmiInfoChange);
 
-#if defined(BOARD_USES_CEC)
-        if (mCECThread->mFlagRunning)
-            mCECThread->stop();
-#endif
-
         if (m_setHdmiOutputMode(mHdmiOutputMode) == false) {
             HDMI_Log(HDMI_LOG_ERROR, "%s::m_setHdmiOutputMode() failed", __func__);
             return false;
@@ -1438,12 +1483,6 @@ bool ExynosHdmi::m_reset(int w, int h, int dstX, int dstY, int colorFormat, int 
             mHdmiOutFieldOrder = GSC_TV_OUT_INTERLACED;
         else
             mHdmiOutFieldOrder = GSC_TV_OUT_PROGRESSIVE;
-
-#if defined(BOARD_USES_CEC)
-        if (!(mCECThread->mFlagRunning))
-            mCECThread->start();
-#endif
-
     }
 
     if (w != mSrcWidth[hdmiLayer] ||

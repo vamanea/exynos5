@@ -81,6 +81,10 @@ ifeq ($(BOARD_USES_SCALABLE_FB),true)
 	LOCAL_CFLAGS  += -DSCALABLE_FB
 endif
 
+ifeq ($(BOARD_USES_CEC),true)
+	LOCAL_CFLAGS  += -DBOARD_USES_CEC
+endif
+
 LOCAL_MODULE := libhdmi
 include $(BUILD_SHARED_LIBRARY)
 

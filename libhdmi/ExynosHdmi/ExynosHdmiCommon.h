@@ -23,7 +23,6 @@
 #include <cutils/log.h>
 
 #define BOARD_USES_EDID
-//#define BOARD_USES_CEC
 #define SUPPORT_G2D_UI_MODE
 //#define USE_MEMCPY_USERPTR_GSC
 
