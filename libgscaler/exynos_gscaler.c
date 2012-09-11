@@ -862,7 +862,7 @@ static bool m_exynos_gsc_destroy(
     return true;
 }
 
-static int m_exnos_get_gsc_idx(void)
+static int m_exynos_get_gsc_idx(void)
 {
     int i  = 0;
     int j = 0;
@@ -915,7 +915,7 @@ bool m_exynos_gsc_find_and_create(
 
     /* to do: dynamic allocation */
     /* get the gsc_idx based on the usage stats */
-    gsc_idx = m_exnos_get_gsc_idx();
+    gsc_idx = m_exynos_get_gsc_idx();
 
     ALOGD("#################################\n\n\n\n\n");
     ALOGD("m_exynos_gsc_find_and_create (gsc_idx %d)", gsc_idx);
