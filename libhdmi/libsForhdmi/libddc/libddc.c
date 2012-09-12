@@ -59,6 +59,10 @@
 #define DEV_NAME    "/dev/i2c-0"
 #endif
 
+#ifdef USE_SYSFS_FOR_DDC
+#define DEV_NAME    "/sys/class/mhl/mhl_edid/deliver_edid"
+#endif
+
 /**
  * DDC file descriptor
  */
@@ -202,6 +206,7 @@ int EDDCRead(unsigned char segpointer, unsigned char segment, unsigned char addr
     struct i2c_rdwr_ioctl_data msgset;
     struct i2c_msg msgs[3];
     int ret = 1;
+    int nbytes = 0;
 
     if (!DDCFileAvailable()) {
 #if DDC_DEBUG
@@ -210,6 +215,13 @@ int EDDCRead(unsigned char segpointer, unsigned char segment, unsigned char addr
         return 0;
     }
 
+#ifdef USE_SYSFS_FOR_DDC
+    if ((nbytes = read(ddc_fd, buffer, size)) < 0) {
+        ALOGE("%s: read from %s failed!!!", __func__, DEV_NAME);
+        return 0;
+    }
+    return nbytes;
+#else
     // set segment pointer
     msgs[0].addr  = segpointer>>1;
     // ignore ack only if segment is "0"
@@ -244,6 +256,7 @@ int EDDCRead(unsigned char segpointer, unsigned char segment, unsigned char addr
         ret = 0;
     }
     return ret;
+#endif
 }
 
 /**
@@ -259,6 +272,15 @@ int DDCWrite(unsigned char addr, unsigned char offset, unsigned int size, unsign
     unsigned char* temp;
     int bytes;
     int retval = 0;
+    int nbytes = 0;
+
+#ifdef USE_SYSFS_FOR_DDC
+    if ((nbytes =  write(ddc_fd, buffer, size)) < 0 ) {
+        ALOGE("%s: write to %s failed!!!", __func__, DEV_NAME);
+        return 0;
+    }
+    return nbytes;
+#else
 
     // allocate temporary buffer
     temp = (unsigned char*) malloc((size+1)*sizeof(unsigned char));
@@ -294,4 +316,5 @@ exit:
         free(temp);
 
     return retval;
+#endif
 }
