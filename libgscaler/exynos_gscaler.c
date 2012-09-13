@@ -2134,6 +2134,14 @@ static int exynos_gsc_cap_config(void *handle,
         return -1;
     }
 
+    if (gsc_handle->dst_img.rgb_csc_type != GSC_RGB_CSC_WIDE)
+        gsc_handle->dst_img.rgb_csc_type = GSC_RGB_CSC_NARROW;
+
+    if (exynos_v4l2_s_ctrl(gsc_handle->gsc_vd_entity->fd, V4L2_CID_CSC_RANGE, gsc_handle->dst_img.rgb_csc_type) < 0) {
+        ALOGE("%s::exynos_v4l2_s_ctrl(V4L2_CID_CSC_RANGE) fail", __func__);
+        return -1;
+    }
+
     if (exynos_v4l2_s_ctrl(gsc_handle->gsc_vd_entity->fd,
         V4L2_CID_CACHEABLE, gsc_handle->src_img.cacheable) < 0) {
         ALOGE("%s:: exynos_v4l2_s_ctrl (V4L2_CID_CACHEABLE: 1) failed", __func__);

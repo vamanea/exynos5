@@ -68,6 +68,7 @@ typedef struct {
     uint32_t drmMode;
     uint32_t fieldOrder;
     uint32_t reqBufCnt;
+    uint32_t rgb_csc_type;
 } exynos_gsc_img;
 
 /*
@@ -360,6 +361,11 @@ enum {
 enum {
     GSC_CTRL_OUT_MODE = 0,
     GSC_CTRL_RESERVED,
+};
+
+enum {
+    GSC_RGB_CSC_NARROW = 0,
+    GSC_RGB_CSC_WIDE,
 };
 
 #ifdef __cplusplus
