@@ -1599,6 +1599,7 @@ bool ExynosHdmi::m_reset(int w, int h, int dstX, int dstY, int colorFormat, int 
                     dst_info.cacheable = 0;
                     dst_info.drmMode = 0;
                     dst_info.reqBufCnt = 1;
+                    dst_info.rgb_csc_type = GSC_RGB_CSC_NARROW;
 
                     mxr_dstFW = dst_info.fw;
                     mxr_dstFH = dst_info.fh;
