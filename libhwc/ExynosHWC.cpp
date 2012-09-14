@@ -1421,6 +1421,7 @@ static int hwc_set(hwc_composer_device_t *dev,
         win = &ctx->win[i];
         if ((win->status == HWC_WIN_RESERVED) &&
             (skip_lay_rendering[i] == 0) && (win->ovly_lay_type == HWC_RGB_OVLY)) {
+            window_set_blend(win, list->hwLayers[win->layer_index].blending);
             if (win->need_win_config) {
                 window_set_pos(win);
                 win->need_win_config = 0;
@@ -1441,6 +1442,7 @@ static int hwc_set(hwc_composer_device_t *dev,
                             SEC_HWC_Log(HWC_LOG_ERROR, "%s:: error : exynos_gsc_wait_done", __func__);
                         }
                     }
+                    window_set_blend(&ctx->win[i], list->hwLayers[ctx->win[i].layer_index].blending);
                     if (ctx->win[i].gsc_mode == GSC_M2M_MODE) {
                         ctx->win[i].is_gsc_started = 0;
                         if (ctx->win[i].need_win_config) {
@@ -1456,6 +1458,17 @@ static int hwc_set(hwc_composer_device_t *dev,
                 }
             }
         }
+    }
+
+    if (list && ctx->num_of_fb_layer) {
+        int blend_mode = HWC_BLENDING_COVERAGE;
+        for (int i = ctx->num_of_hwc_layer; i < list->numHwLayers ; i++) {
+            if (list->hwLayers[i].blending == HWC_BLENDING_PREMULT) {
+                blend_mode = HWC_BLENDING_PREMULT;
+                break;
+            }
+        }
+        window_set_blend(&ctx->ui_win, blend_mode);
     }
 
     if (need_swap_buffers) {

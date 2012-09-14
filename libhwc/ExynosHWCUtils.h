@@ -160,6 +160,7 @@ struct hwc_win_info_t {
     int         need_win_config;
     int         need_gsc_config;
     int         is_gsc_started;
+    int         cur_blend_mode;
 };
 
 enum {
@@ -224,6 +225,7 @@ struct hwc_context_t {
     hwc_procs_t               *procs;
     pthread_t                 vsync_thread;
 #endif
+    int     cur_blend_mode;
     int     need_to_try_overlay;
     int     overaly_delay_frames;
 };
@@ -256,6 +258,7 @@ int window_pan_display(struct hwc_win_info_t *win);
 int window_show       (struct hwc_win_info_t *win);
 int window_hide       (struct hwc_win_info_t *win);
 int window_get_global_lcd_info(int fd, struct fb_var_screeninfo *lcd_info);
+int window_set_blend(struct hwc_win_info_t *win, int mode);
 
 #if defined(FIMG2D4X)
 int runCompositor(struct hwc_context_t *ctx,

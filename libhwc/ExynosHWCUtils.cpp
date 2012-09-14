@@ -143,6 +143,26 @@ int window_close(struct hwc_win_info_t *win)
     return ret;
 }
 
+int window_set_blend(struct hwc_win_info_t *win, int mode)
+{
+    int blend_mode = 0;
+
+    if (mode == HWC_BLENDING_PREMULT)
+        blend_mode = 1;
+
+    if (win->cur_blend_mode == blend_mode)
+        return 0;
+
+    if (ioctl(win->fd, S3CFB_SET_BLEND_MODE, &blend_mode) < 0) {
+        SEC_HWC_Log(HWC_LOG_ERROR, "%s::S3CFB_SET_BLEND_MODE fail", __func__);
+        return -1;
+    }
+
+    win->cur_blend_mode = blend_mode;
+
+    return 0;
+}
+
 int window_set_pos(struct hwc_win_info_t *win)
 {
     struct s3cfb_user_window window;
