@@ -413,7 +413,7 @@ namespace android {
         //ALOGD("%s TV ROTATE = %d", __func__, rotVal);
         Mutex::Autolock _l(mLock);
 
-        if ((hdmiCableInserted() == true) && (mExynosHdmi.setUIRotation(rotVal, hwcLayer)) == false) {
+        if ((mExynosHdmi.setUIRotation(rotVal, hwcLayer)) == false) {
             ALOGE("%s::mExynosHdmi.setUIRotation() fail", __func__);
             return;
         }
