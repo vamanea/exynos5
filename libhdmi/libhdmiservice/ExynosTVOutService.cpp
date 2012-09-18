@@ -431,6 +431,7 @@ namespace android {
     void ExynosTVOutService::setHdmiClearLayer(uint32_t enable)
     {
         Mutex::Autolock _l(mLock);
+        mEnable = enable;
 
         if (hdmiCableInserted() == false)
             return;
@@ -443,7 +444,6 @@ namespace android {
                 if (mExynosHdmi.clear(layer) == false)
                     ALOGE("%s::mExynosHdmi.clear(%d) fail", __func__, layer);
         }
-        mEnable = enable;
         return;
     }
 
