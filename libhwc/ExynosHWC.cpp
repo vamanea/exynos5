@@ -685,10 +685,8 @@ static int assign_overlay_window(struct hwc_context_t *ctx, hwc_layer_t *cur,
         else if ((win->ovly_lay_type == HWC_YUV_OVLY)  &&
                 (win->gsc_mode == GSC_OUTPUT_MODE)) {
             if ((win->rect_info.w == rect.w) && (win->rect_info.h == rect.h) &&
-                (win->rect_info.x == (rect.x & (~1))) &&
-                (win->rect_info.y == (rect.y & (~1)))) {
-                rect.x = win->rect_info.x;
-                rect.y = win->rect_info.y;
+                ((win->rect_info.x == (rect.x & (~1))) || (win->rect_info.x == (rect.x + 1))) &&
+                ((win->rect_info.y == (rect.y & (~1))) || (win->rect_info.y == (rect.y + 1)))) {
                 win->layer_index = layer_idx;
                 win->status = HWC_WIN_RESERVED;
                 return 0;
