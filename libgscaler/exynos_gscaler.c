@@ -1454,6 +1454,9 @@ int exynos_gsc_m2m_config(void *handle,
         return -1;
     }
 
+    memcpy(&gsc_handle->src_img, src_img, sizeof(exynos_gsc_img));
+    memcpy(&gsc_handle->dst_img, dst_img, sizeof(exynos_gsc_img));
+
     src_color_space = HAL_PIXEL_FORMAT_2_V4L2_PIX(src_img->format);
     dst_color_space = HAL_PIXEL_FORMAT_2_V4L2_PIX(dst_img->format);
     rotateValueHAL2GSC(dst_img->rot, &rotate, &hflip, &vflip);
@@ -1865,6 +1868,24 @@ static int exynos_gsc_m2m_run_core(void *handle)
     if (m_exynos_gsc_set_addr(gsc_handle->gsc_fd, &gsc_handle->dst) == false) {
         ALOGE("%s::m_exynos_gsc_set_addr(dst) fail", __func__);
         goto done;
+    }
+
+    if (gsc_handle->dst_img.rgb_csc_eq_type != GSC_RGB_709_EQ)
+        gsc_handle->dst_img.rgb_csc_eq_type = GSC_RGB_601_EQ;
+
+    if (exynos_v4l2_s_ctrl(gsc_handle->gsc_fd, V4L2_CID_CSC_EQ,
+        gsc_handle->dst_img.rgb_csc_eq_type) < 0) {
+        ALOGE("%s::exynos_v4l2_s_ctrl(V4L2_CID_CSC_EQ) fail", __func__);
+        return -1;
+    }
+
+    if (gsc_handle->dst_img.rgb_csc_type != GSC_RGB_CSC_WIDE)
+        gsc_handle->dst_img.rgb_csc_type = GSC_RGB_CSC_NARROW;
+
+    if (exynos_v4l2_s_ctrl(gsc_handle->gsc_fd, V4L2_CID_CSC_RANGE,
+        gsc_handle->dst_img.rgb_csc_type) < 0) {
+        ALOGE("%s::exynos_v4l2_s_ctrl(V4L2_CID_CSC_RANGE) fail", __func__);
+        return -1;
     }
 
     if (gsc_handle->src.stream_on == false) {

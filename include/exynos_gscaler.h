@@ -69,6 +69,7 @@ typedef struct {
     uint32_t fieldOrder;
     uint32_t reqBufCnt;
     uint32_t rgb_csc_type;
+    uint32_t rgb_csc_eq_type;
 } exynos_gsc_img;
 
 /*
@@ -366,6 +367,11 @@ enum {
 enum {
     GSC_RGB_CSC_NARROW = 0,
     GSC_RGB_CSC_WIDE,
+};
+
+enum {
+    GSC_RGB_601_EQ = 0,
+    GSC_RGB_709_EQ,
 };
 
 #ifdef __cplusplus
