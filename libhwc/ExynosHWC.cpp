@@ -1054,7 +1054,7 @@ static int hwc_prepare(hwc_composer_device_t *dev, hwc_layer_list_t* list)
         ctx->mHdmiClient->setHdmiHwcLayer(ctx->num_of_ext_disp_layer);
     }
 
-    if ((ctx->num_of_hwc_layer == 1) && (get_hwc_num_of_yuv_layers(ctx, list) == 1)) {
+    if (ctx->num_of_yuv_layers == 1) {
         ctx->mHdmiClient->setHdmiPath(HDMI_PATH_OVERLAY);
         if (ctx->num_of_protected_layer)
             ctx->mHdmiClient->setHdmiDRM(android::ExynosHdmiClient::HDMI_DRM_MODE);
