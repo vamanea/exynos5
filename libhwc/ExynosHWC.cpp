@@ -1196,10 +1196,6 @@ static int hwc_set(hwc_composer_device_t *dev,
     }
 
     if (!list) {
-        //turn off the all windows
-        for (int i = 0; i < NUM_OF_WIN; i++) {
-            window_hide(&ctx->win[i]);
-        }
         ctx->num_of_hwc_layer = 0;
         need_swap_buffers = true;
     }
