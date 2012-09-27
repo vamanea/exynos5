@@ -986,7 +986,7 @@ bool ExynosHdmi::m_Doflush(int srcW, int srcH, int srcColorFormat,
     return true;
 }
 
-bool ExynosHdmi::clearHdmiWriteBack()
+bool ExynosHdmi::m_clearHdmiWriteBack()
 {
     HDMI_Log(HDMI_LOG_DEBUG, "%s::layer=%d", __func__);
 
@@ -1009,6 +1009,11 @@ bool ExynosHdmi::clear(int hdmiLayer)
 
     if (mFlagCreate == false) {
         HDMI_Log(HDMI_LOG_ERROR, "%s::Not Yet Created", __func__);
+        return false;
+    }
+
+    if (mHdmiPath == HDMI_PATH_WRITEBACK && m_clearHdmiWriteBack() == false) {
+        HDMI_Log(HDMI_LOG_ERROR, "%s::m_clearHdmiWriteBack() fail", __func__);
         return false;
     }
 

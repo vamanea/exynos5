@@ -212,7 +212,6 @@ public :
                         int hdmiMode,
                         int flag_full_display);
 
-    bool        clearHdmiWriteBack();
     bool        clear(int hdmiLayer);
     bool        setHdmiLayerEnable(int hdmiLayer);
     bool        setHdmiLayerDisable(int hdmiLayer);
@@ -243,6 +242,7 @@ private:
 
     bool        m_runHdmi(int layer, unsigned int srcYAddr, unsigned int srcCbAddr, unsigned int srcCrAddr);
     bool        m_stopHdmi(int layer);
+    bool        m_clearHdmiWriteBack();
 
     bool        m_setHdmiOutputMode(int hdmiOutputMode);
     bool        m_setHdmiResolution(unsigned int hdmiResolutionValue, unsigned int s3dMode);

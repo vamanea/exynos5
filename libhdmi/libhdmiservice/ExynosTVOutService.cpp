@@ -437,12 +437,19 @@ namespace android {
             return;
 
         if (enable == 0) {
-            if (mExynosHdmi.clearHdmiWriteBack() == false)
-                ALOGE("%s::mExynosHdmi.clearHdmiWriteBack() fail", __func__);
+            pthread_mutex_t *mutex;
 
-            for (int layer = ExynosHdmi::HDMI_LAYER_BASE + 1; layer < ExynosHdmi::HDMI_LAYER_MAX; layer++)
+            for (int layer = ExynosHdmi::HDMI_LAYER_BASE + 1; layer < ExynosHdmi::HDMI_LAYER_MAX; layer++) {
+                if (layer == HDMI_LAYER_VIDEO)
+                    mutex = &sync_mutex_disable_video;
+                else
+                    mutex = &sync_mutex_disable_ui;
+
+                pthread_mutex_lock(mutex);
                 if (mExynosHdmi.clear(layer) == false)
                     ALOGE("%s::mExynosHdmi.clear(%d) fail", __func__, layer);
+                pthread_mutex_unlock(mutex);
+            }
         }
         return;
     }
