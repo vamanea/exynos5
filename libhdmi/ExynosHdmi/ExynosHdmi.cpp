@@ -988,7 +988,7 @@ bool ExynosHdmi::m_Doflush(int srcW, int srcH, int srcColorFormat,
 
 bool ExynosHdmi::m_clearHdmiWriteBack()
 {
-    HDMI_Log(HDMI_LOG_DEBUG, "%s::layer=%d", __func__);
+    HDMI_Log(HDMI_LOG_DEBUG, "%s", __func__);
 
     if (m_gsc_cap_handle) {
         if (exynos_gsc_just_stop(m_gsc_cap_handle) < 0) {
