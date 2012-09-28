@@ -106,6 +106,29 @@ static unsigned int __ColorFormatType_To_V4L2PixelFormat(ExynosVideoColorFormatT
 }
 
 /*
+ * [Common] __V4L2PixelFormat_To_ColorFormatType
+ */
+static ExynosVideoColorFormatType __V4L2PixelFormat_To_ColorFormatType(unsigned int pixelformat)
+{
+    ExynosVideoColorFormatType colorFormatType = VIDEO_COLORFORMAT_NV12_TILED;
+
+    switch (pixelformat) {
+    case V4L2_PIX_FMT_NV12M:
+        colorFormatType = VIDEO_COLORFORMAT_NV12;
+        break;
+    case V4L2_PIX_FMT_NV21M:
+        colorFormatType = VIDEO_COLORFORMAT_NV21;
+        break;
+    case V4L2_PIX_FMT_NV12MT:
+    default:
+        colorFormatType = VIDEO_COLORFORMAT_NV12_TILED;
+        break;
+    }
+
+    return colorFormatType;
+}
+
+/*
  * [Decoder OPS] Init
  */
 static void *MFC_Decoder_Init(int nMemoryType)
@@ -778,6 +801,7 @@ static ExynosVideoErrorType MFC_Decoder_Get_Geometry_Outbuf(
 
     bufferConf->nFrameWidth = fmt.fmt.pix_mp.width;
     bufferConf->nFrameHeight = fmt.fmt.pix_mp.height;
+    bufferConf->eColorFormat = __V4L2PixelFormat_To_ColorFormatType(fmt.fmt.pix_mp.pixelformat);
 
     bufferConf->cropRect.nTop = crop.c.top;
     bufferConf->cropRect.nLeft = crop.c.left;
