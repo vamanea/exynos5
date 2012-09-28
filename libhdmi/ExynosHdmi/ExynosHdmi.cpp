@@ -1108,6 +1108,7 @@ bool ExynosHdmi::setHdmiDrmMode(int drmMode)
 
     if (mHdmiDrmMode != drmMode) {
         mHdmiDrmMode = drmMode;
+        mHdmiInfoChange = true;
     }
 
     return true;
