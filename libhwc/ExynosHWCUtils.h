@@ -98,8 +98,8 @@
 
 struct hwc_ui_lay_info{
     uint32_t    layer_prev_buf;
-    int     layer_index;
-    int     status;
+    int         layer_index;
+    int         status;
 };
 
 #define CACHEABLE      1
@@ -180,60 +180,59 @@ enum {
 };
 
 struct hwc_context_t {
-    hwc_composer_device_t device;
+    hwc_composer_device_t       device;
 
     /* our private state goes below here */
-    struct hwc_win_info_t     win[NUM_OF_WIN];
+    struct hwc_win_info_t       win[NUM_OF_WIN];
 #ifdef SKIP_DUMMY_UI_LAY_DRAWING
-    struct hwc_ui_lay_info  win_virt[NUM_OF_DUMMY_WIN];
-    int         fb_lay_skip_initialized;
-    int         num_of_fb_lay_skip;
+    struct hwc_ui_lay_info      win_virt[NUM_OF_DUMMY_WIN];
+    int                         fb_lay_skip_initialized;
+    int                         num_of_fb_lay_skip;
 #ifdef GL_WA_OVLY_ALL
-    int         ui_skip_frame_cnt;
+    int                         ui_skip_frame_cnt;
 #endif
 #endif
-    struct hwc_win_info_t     ui_win;
-    struct fb_var_screeninfo  lcd_info;
-    int            num_of_fb_layer;
-    int            num_of_hwc_layer;
-    int            num_of_fb_layer_prev;
-    int            gsc_mode;
-    void           *gsc_handle;
-    int            num_2d_blit_layer;
-    uint32_t    layer_prev_buf[NUM_OF_WIN];
-    int           dis_rect_changed;
-    int         gsc_out_max_down_scale_ratio;
+    struct hwc_win_info_t       ui_win;
+    struct fb_var_screeninfo    lcd_info;
+    int                         num_of_fb_layer;
+    int                         num_of_hwc_layer;
+    int                         num_of_fb_layer_prev;
+    int                         gsc_mode;
+    void                        *gsc_handle;
+    uint32_t                    layer_prev_buf[NUM_OF_WIN];
+    int                         dis_rect_changed;
+    int                         gsc_out_max_down_scale_ratio;
 #if defined(BOARD_USES_HDMI)
-    android::ExynosHdmiClient    *mHdmiClient;
-    int                       mHdmiCableStatus;
-    int                       num_of_s3d_layer;
-    int                       num_of_protected_layer;
-    int                       num_of_ext_disp_layer;
-    int                       num_of_ext_disp_video_layer;
-    int                       hdmi_layer_buf_index[android::ExynosHdmiClient::HDMI_LAYER_MAX];
+    android::ExynosHdmiClient   *mHdmiClient;
+    int                         mHdmiCableStatus;
+    int                         num_of_s3d_layer;
+    int                         num_of_protected_layer;
+    int                         num_of_ext_disp_layer;
+    int                         num_of_ext_disp_video_layer;
+    int                         hdmi_layer_buf_index[android::ExynosHdmiClient::HDMI_LAYER_MAX];
 #endif
 
-    int                       num_of_yuv_layers;
+    int                         num_of_yuv_layers;
 #ifdef SUPPORT_RGB_OVERLAY
-    int                       is_rgb_ovly_ok;
-    int                       ovly_bandwidth;
+    int                         is_rgb_ovly_ok;
+    int                         ovly_bandwidth;
 #endif
 #ifdef GRALLOC_MOD_ACCESS
-    gralloc_module_public_t *psGrallocModule;
+    gralloc_module_public_t     *psGrallocModule;
 #endif
 #ifdef  VSYNC_THREAD_ENABLE
-    hwc_procs_t               *procs;
-    pthread_t                 vsync_thread;
+    hwc_procs_t                 *procs;
+    pthread_t                   vsync_thread;
 #endif
 #ifdef HWC_GL_FB_FLIP_UEVENT
-    int     fb_flip_uevent_cnt;
-    uint32_t   fb_buf_offset;
-    pthread_mutex_t fb_flip_lock;
-    pthread_cond_t  fb_flip_completion;
+    int                         fb_flip_uevent_cnt;
+    uint32_t                    fb_buf_offset;
+    pthread_mutex_t             fb_flip_lock;
+    pthread_cond_t              fb_flip_completion;
 #endif
-    int     cur_blend_mode;
-    int     need_to_try_overlay;
-    int     overaly_delay_frames;
+    int                         cur_blend_mode;
+    int                         need_to_try_overlay;
+    int                         overaly_delay_frames;
 };
 
 typedef enum _LOG_LEVEL {
