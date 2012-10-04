@@ -47,8 +47,8 @@ ifeq ($(BOARD_HDMI_DDC_CH), DDC_CH_I2C_8)
 LOCAL_CFLAGS  += -DDDC_CH_I2C_8
 endif
 
-ifeq ($(BOARD_USES_SYSFS_FOR_DDC), true)
-LOCAL_CFLAGS  += -DUSE_SYSFS_FOR_DDC
+ifeq ($(BOARD_USES_MHL), true)
+LOCAL_CFLAGS  += -DUSES_MHL
 endif
 
 LOCAL_MODULE := libddc

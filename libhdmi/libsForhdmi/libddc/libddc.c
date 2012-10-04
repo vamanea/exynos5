@@ -59,7 +59,7 @@
 #define DEV_NAME    "/dev/i2c-0"
 #endif
 
-#ifdef USE_SYSFS_FOR_DDC
+#ifdef USES_MHL
 #define DEV_NAME    "/sys/class/mhl/mhl_edid/deliver_edid"
 #endif
 
@@ -215,7 +215,7 @@ int EDDCRead(unsigned char segpointer, unsigned char segment, unsigned char addr
         return 0;
     }
 
-#ifdef USE_SYSFS_FOR_DDC
+#ifdef USES_MHL
     if ((nbytes = read(ddc_fd, buffer, size)) < 0) {
         ALOGE("%s: read from %s failed!!!", __func__, DEV_NAME);
         return 0;
@@ -274,7 +274,7 @@ int DDCWrite(unsigned char addr, unsigned char offset, unsigned int size, unsign
     int retval = 0;
     int nbytes = 0;
 
-#ifdef USE_SYSFS_FOR_DDC
+#ifdef USES_MHL
     if ((nbytes =  write(ddc_fd, buffer, size)) < 0 ) {
         ALOGE("%s: write to %s failed!!!", __func__, DEV_NAME);
         return 0;
