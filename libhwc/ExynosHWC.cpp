@@ -817,6 +817,8 @@ static int get_gsc_out_down_scale_ratio(int xres, int yres)
 {
     if (((xres == 720) ||(xres == 640)) && (yres == 480))
         return 4;
+    else if ((xres == 1024) && (yres == 600))
+        return 4;
     else if ((xres == 1280) && (yres == 720))
         return 4;
     else if ((xres == 1280) && (yres == 800))

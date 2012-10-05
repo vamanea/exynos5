@@ -218,6 +218,10 @@ static int exynos_gsc_scale_ratio_check(struct GSC_HANDLE *gsc_handle)
                 if ((gsc_handle->dst_img.w * 4 < gsc_handle->src_img.w) ||
                     (gsc_handle->dst_img.h * 4 < gsc_handle->src_img.h))
                     ret = -1;
+            } else if ((gsc_handle->dst_img.fw == 1024) && (gsc_handle->dst_img.fh == 600)) {
+                if ((gsc_handle->dst_img.w * 4 < gsc_handle->src_img.w) ||
+                    (gsc_handle->dst_img.h * 4 < gsc_handle->src_img.h))
+                    ret = -1;
             } else if ((gsc_handle->dst_img.fw == 1280) && (gsc_handle->dst_img.fh == 720)) {
                 if ((gsc_handle->dst_img.w * 4 < gsc_handle->src_img.w) ||
                     (gsc_handle->dst_img.h * 4 < gsc_handle->src_img.h))
@@ -250,6 +254,12 @@ static int exynos_gsc_scale_ratio_check(struct GSC_HANDLE *gsc_handle)
             break;
         }
     }
+
+    ALOGE_IF(ret != 0, "%s::Unsupported scale ratio! "
+             "gsc_mode=%d, src_img=%dx%d, dst_img=%dx%d", __func__,
+             gsc_handle->gsc_mode,
+             gsc_handle->src_img.w, gsc_handle->src_img.h,
+             gsc_handle->dst_img.w, gsc_handle->dst_img.h);
 
     return ret;
 }
