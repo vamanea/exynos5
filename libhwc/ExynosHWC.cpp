@@ -1830,6 +1830,13 @@ static int hwc_device_open(const struct hw_module_t* module, const char* name,
             status = -EINVAL;
             goto err;
         }
+
+        if (ioctl(win->fd, FBIOBLANK, FB_BLANK_POWERDOWN) < 0) {
+            SEC_HWC_Log(HWC_LOG_ERROR, "%s::FBIOBLANK failed : (%d:%s)",
+             __func__, win->fd, strerror(errno));
+            return -1;
+        }
+        win->power_state = 0;
     }
 
 #ifdef GRALLOC_MOD_ACCESS
