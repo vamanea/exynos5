@@ -1804,7 +1804,7 @@ static ExynosVideoErrorType MFC_Encoder_Enqueue_Inbuf(
     index = MFC_Encoder_Find_Inbuf(pCtx, pBuffer[0]);
     if (index == -1) {
         pthread_mutex_unlock(pMutex);
-        ALOGE("%s: Failed to get index", __func__);
+        ALOGW("%s: Matching Buffer index not found", __func__);
         ret = VIDEO_ERROR_NOBUFFERS;
         goto EXIT;
     }
