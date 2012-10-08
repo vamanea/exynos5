@@ -473,10 +473,10 @@ int runCompositor(struct hwc_context_t *ctx,
         if ((src_img->paddr != NULL) &&
                 ((src_img->w != dst_img->h) || (src_img->h != dst_img->w))) {
             scale.mode = SCALING_BILINEAR;
-            scale.src_w = src_img->w;
-            scale.src_h = src_img->h;
-            scale.dst_w = dst_img->h;
-            scale.dst_h = dst_img->w;
+            scale.src_w = src_rect->w;
+            scale.src_h = src_rect->h;
+            scale.dst_w = dst_rect->h;
+            scale.dst_h = dst_rect->w;
             cmd.param.scaling = scale;
         }
         else {
@@ -486,10 +486,10 @@ int runCompositor(struct hwc_context_t *ctx,
         if ((src_img->paddr != NULL) &&
                 ((src_img->w != dst_img->w) || (src_img->h != dst_img->h))) {
             scale.mode = SCALING_BILINEAR;
-            scale.src_w = src_img->w;
-            scale.src_h = src_img->h;
-            scale.dst_w = dst_img->w;
-            scale.dst_h = dst_img->h;
+            scale.src_w = src_rect->w;
+            scale.src_h = src_rect->h;
+            scale.dst_w = dst_rect->w;
+            scale.dst_h = dst_rect->h;
             cmd.param.scaling = scale;
         }
         else {
