@@ -1815,6 +1815,17 @@ bool ExynosHdmi::m_runHdmi(int layer, unsigned int srcYAddr, unsigned int srcCbA
         src_info.cacheable = 0;
         src_info.drmMode = 0;
 
+#if defined(BOARD_USES_HDMI_SUBTITLES)
+        struct MXR_HANDLE *mxr_handle;
+        mxr_handle = (struct MXR_HANDLE *)m_mxr_handle_grp0;
+        struct GSC_HANDLE *gsc_handle;
+        gsc_handle = (struct GSC_HANDLE *)m_gsc_out_handle;
+        if (mxr_handle->stream_on == true && gsc_handle->src.stream_on == false) {
+            if (exynos_mxr_just_stop(mxr_handle) < 0)
+                HDMI_Log(HDMI_LOG_ERROR, "%s::failed to stop graphic layer", __func__);
+        }
+#endif //BOARD_USES_HDMI_SUBTITLES
+
         if (mHdmiOutFieldOrder == GSC_TV_OUT_INTERLACED) {
             struct GSC_HANDLE *gsc_handle;
             gsc_handle = (struct GSC_HANDLE *)m_gsc_out_handle;
