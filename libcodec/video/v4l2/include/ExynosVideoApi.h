@@ -231,6 +231,7 @@ typedef struct _ExynosVideoDecOps {
     ExynosVideoErrorType  (*Enable_SliceMode)(void *pHandle);
     ExynosVideoErrorType  (*Enable_SEIParsing)(void *pHandle);
     ExynosVideoErrorType  (*Get_FramePackingInfo)(void *pHandle, ExynosVideoFramePacking *pFramepacking);
+    ExynosVideoErrorType  (*Set_FrameRate)(void *pHandle, int frameRate);
 } ExynosVideoDecOps;
 
 typedef struct _ExynosVideoEncOps {

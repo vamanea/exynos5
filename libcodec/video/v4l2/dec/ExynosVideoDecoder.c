@@ -468,6 +468,31 @@ EXIT:
 }
 
 /*
+ * [Decoder OPS] Set Framerate
+ */
+static ExynosVideoErrorType MFC_Decoder_Set_FrameRate(
+    void    *pHandle,
+    int      frameRate)
+{
+    ExynosVideoDecContext *pCtx = (ExynosVideoDecContext *)pHandle;
+    ExynosVideoErrorType   ret  = VIDEO_ERROR_NONE;
+
+    if (pCtx == NULL) {
+        ALOGE("%s: Video context info must be supplied", __func__);
+        ret = VIDEO_ERROR_BADPARAM;
+        goto EXIT;
+    }
+
+    if (exynos_v4l2_s_ctrl(pCtx->hDec, V4L2_CID_MPEG_MFC51_VIDEO_FRAME_RATE, frameRate) != 0) {
+        ret = VIDEO_ERROR_APIFAIL;
+        goto EXIT;
+    }
+
+EXIT:
+    return ret;
+}
+
+/*
  * [Decoder OPS] Get Frame Packing information
  */
 static ExynosVideoErrorType MFC_Decoder_Get_FramePackingInfo(
@@ -1746,6 +1771,7 @@ static ExynosVideoDecOps defDecOps = {
     .Get_FrameTag           = MFC_Decoder_Get_FrameTag,
     .Enable_SEIParsing      = MFC_Decoder_Enable_SEIParsing,
     .Get_FramePackingInfo   = MFC_Decoder_Get_FramePackingInfo,
+    .Set_FrameRate          = MFC_Decoder_Set_FrameRate,
 };
 
 /*
