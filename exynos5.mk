@@ -34,6 +34,11 @@ PRODUCT_PACKAGES += \
 	libOMX.Exynos.WMV.Decoder
 endif
 
+# libaudio
+PRODUCT_PACKAGES += \
+	audio_policy.exynos5 \
+	audio.primary.exynos5
+
 # ALP Audio
 ifeq ($(BOARD_USE_ALP_AUDIO),true)
 PRODUCT_PACKAGES += \
