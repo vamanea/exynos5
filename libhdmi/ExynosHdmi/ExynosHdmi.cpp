@@ -882,7 +882,11 @@ bool ExynosHdmi::m_Doflush(int srcW, int srcH, int srcColorFormat,
     }
 
     if (srcYAddr == 0 && mHdmiPath == HDMI_PATH_OVERLAY) {
+#if defined(PERSISTENT_UI)
         unsigned int FB_size = ALIGN(srcW, 16) * ALIGN(srcH, 16) * HDMI_UI_BUFFER_BPP_SIZE * 3;
+#else
+        unsigned int FB_size = ALIGN(srcW, 16) * ALIGN(srcH, 16) * HDMI_UI_BUFFER_BPP_SIZE * 2;
+#endif
         struct s3c_fb_user_ion_client ion_handle;
 
         if (0 < mFBaddr)
