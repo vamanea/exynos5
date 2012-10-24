@@ -26,11 +26,7 @@
 #define SUPPORT_G2D_UI_MODE
 //#define USE_MEMCPY_USERPTR_GSC
 
-#if defined(PERSISTENT_UI)
-#define DEFAULT_UI_PATH          HDMI_PATH_OVERLAY
-#else
 #define DEFAULT_UI_PATH          HDMI_PATH_WRITEBACK
-#endif
 
 #define DEFAULT_FB_INDEX            (0)
 #define DEFAULT_GSC_OUT_INDEX       (3)
