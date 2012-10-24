@@ -1033,7 +1033,11 @@ static int hwc_prepare(hwc_composer_device_t *dev, hwc_layer_list_t* list)
             compositionType = get_hwc_compos_decision(ctx, cur, overlay_win_cnt);
 
 #if defined(BOARD_USES_HDMI)
+#if defined(PERSISTENT_UI)
+            if (ctx->num_of_ext_disp_video_layer >= 1)
+#else
             if (ctx->num_of_ext_disp_video_layer >= 2)
+#endif
                 ctx->hdmi_layer_buf_index[android::ExynosHdmiClient::HDMI_LAYER_VIDEO] = NOT_DEFINED;
             else if ((compositionType == HWC_OVERLAY) &&
                     (prev_handle->usage & GRALLOC_USAGE_EXTERNAL_DISP))
@@ -1062,7 +1066,11 @@ static int hwc_prepare(hwc_composer_device_t *dev, hwc_layer_list_t* list)
     }
 
 #if defined(BOARD_USES_HDMI)
+#if defined(PERSISTENT_UI)
+    if (ctx->num_of_ext_disp_video_layer > 0) {
+#else
     if (ctx->num_of_ext_disp_video_layer > 1) {
+#endif
         ctx->mHdmiClient->setHdmiHwcLayer(0);
         ctx->hdmi_layer_buf_index[android::ExynosHdmiClient::HDMI_LAYER_GRAPHIC_0] = NOT_DEFINED;
     } else {
@@ -1070,13 +1078,19 @@ static int hwc_prepare(hwc_composer_device_t *dev, hwc_layer_list_t* list)
     }
 
     if (ctx->num_of_yuv_layers == 1) {
+#if !defined(PERSISTENT_UI)
         ctx->mHdmiClient->setHdmiPath(HDMI_PATH_OVERLAY);
+#endif
         if (ctx->num_of_protected_layer)
             ctx->mHdmiClient->setHdmiDRM(android::ExynosHdmiClient::HDMI_DRM_MODE);
         else
             ctx->mHdmiClient->setHdmiDRM(android::ExynosHdmiClient::HDMI_NON_DRM_MODE);
     } else {
+#if defined(PERSISTENT_UI)
+        if (!ctx->num_of_ext_disp_layer || ctx->num_of_ext_disp_video_layer >= 1)
+#else
         if (!ctx->num_of_ext_disp_layer || ctx->num_of_ext_disp_video_layer >= 2)
+#endif
             ctx->mHdmiClient->setHdmiPath(DEFAULT_UI_PATH);
         else
             ctx->mHdmiClient->setHdmiPath(HDMI_PATH_OVERLAY);
@@ -1098,7 +1112,11 @@ static int hwc_prepare(hwc_composer_device_t *dev, hwc_layer_list_t* list)
         ctx->mHdmiClient->setHdmiResolution(0, android::ExynosHdmiClient::HDMI_2D);
 
     if ((ctx->num_of_ext_disp_layer == 0) ||
+#if defined(PERSISTENT_UI)
+        (ctx->num_of_ext_disp_video_layer == 0 && ctx->num_of_ext_disp_layer >= 1) ||
+#else
         (ctx->num_of_ext_disp_video_layer == 0 && ctx->num_of_ext_disp_layer >= 2) ||
+#endif
         (ctx->num_of_ext_disp_video_layer > 1) ||
         (ctx->hdmi_layer_buf_index[android::ExynosHdmiClient::HDMI_LAYER_GRAPHIC_0] != NOT_DEFINED)) {
     }
