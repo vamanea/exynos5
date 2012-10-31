@@ -50,6 +50,7 @@ static unsigned int m_gsc_get_plane_count(
     case V4L2_PIX_FMT_NV12MT_16X16:
     case V4L2_PIX_FMT_NV12:
     case V4L2_PIX_FMT_NV21:
+    case V4L2_PIX_FMT_NV21M:
     case V4L2_PIX_FMT_NV16:
     case V4L2_PIX_FMT_NV61:
         plane_count = 2;
@@ -101,6 +102,7 @@ static int m_gsc_get_plane_size(
     case V4L2_PIX_FMT_NV12M:
     case V4L2_PIX_FMT_NV12:
     case V4L2_PIX_FMT_NV21:
+    case V4L2_PIX_FMT_NV21M:
         plane_size[0] = width * height;
         plane_size[1] = width * (height / 2);
         plane_size[2] = 0;
