@@ -907,6 +907,7 @@ static ExynosVideoErrorType MFC_Decoder_Setup_Inbuf(
             pCtx->pInbuf[i].pGeometry = &pCtx->inbufGeometry;
             pCtx->pInbuf[i].bQueued = VIDEO_FALSE;
             pCtx->pInbuf[i].bRegistered = VIDEO_TRUE;
+            pCtx->pInbuf[i].bInterlaced = VIDEO_FALSE;
         }
     }
 
@@ -1027,6 +1028,7 @@ static ExynosVideoErrorType MFC_Decoder_Setup_Outbuf(
             pCtx->pOutbuf[i].pGeometry = &pCtx->outbufGeometry;
             pCtx->pOutbuf[i].bQueued = VIDEO_FALSE;
             pCtx->pOutbuf[i].bRegistered = VIDEO_TRUE;
+            pCtx->pOutbuf[i].bInterlaced = VIDEO_FALSE;
         }
     }
 
@@ -1689,6 +1691,13 @@ static ExynosVideoBuffer *MFC_Decoder_Dequeue_Outbuf(void *pHandle)
         pOutbuf->frameType = VIDEO_FRAME_OTHERS;
         break;
     };
+
+    if ((buf.field == V4L2_FIELD_INTERLACED) ||
+        (buf.field == V4L2_FIELD_INTERLACED_TB) ||
+        (buf.field == V4L2_FIELD_INTERLACED_BT))
+        pOutbuf->bInterlaced = VIDEO_TRUE;
+    else
+        pOutbuf->bInterlaced = VIDEO_FALSE;
 
     pOutbuf->bQueued = VIDEO_FALSE;
 
